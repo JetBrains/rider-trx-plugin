@@ -1,6 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Linq;
+using System.Threading;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.Rd.Tasks;
@@ -30,9 +32,14 @@ class TrxManager
         myModel.MyCall.SetAsync(HandleCall);
     }
 
-    private bool Do(string trxFilePath)
+    private async Task<bool> Do(string trxFilePath)
     {
-        XDocument document = XDocument.Load(trxFilePath);
+        await Task.Delay(10000);
+        XDocument document;
+        await using (var stream = File.OpenRead(trxFilePath))
+        {
+            document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
+        }
         var root = document.Root;
         if (root == null)
         {
@@ -75,10 +82,10 @@ class TrxManager
     }
     private async Task<RdCallResponse> HandleCall(Lifetime lt, RdCallRequest request)
     {
-        var path = request.MyField;
-        if (Do(path))
+        string path = request.MyField;
+        if (await Do(path))
         {
-            return lt.Execute(() => new RdCallResponse(output));
+            return lt.Execute(() => new RdCallResponse("Success"));
         }
         return lt.Execute(() => new RdCallResponse("Failed"));
     }
