@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Linq;
@@ -11,6 +12,9 @@ using Rider.Plugins.SimplePlugin.Model;
 using JetBrains.ReSharper.UnitTestFramework.Execution;
 using JetBrains.ReSharper.UnitTestFramework.Session;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
+using Rider.Plugins.SimplePlugin.TrxNodes;
+using System.Xml.Serialization;
+using UnitTestResult = Rider.Plugins.SimplePlugin.TrxNodes.UnitTestResult;
 
 namespace Rider.Plugins.SimplePlugin;
 
@@ -32,9 +36,47 @@ class TrxManager
         myModel.MyCall.SetAsync(HandleCall);
     }
 
+    List<UnitTestResult> ParseResults(XElement node, Dictionary<string, string> namespaces)
+    {
+        var results = new List<UnitTestResult>();
+        foreach (var ns in node.Attributes().Where(a => a.IsNamespaceDeclaration))
+        {
+            var prefix = ns.Name.LocalName == "xmlns" ? "" : ns.Name.LocalName;
+            var namespaceUri = ns.Value;
+            namespaces[prefix] = namespaceUri;
+        }
+
+        foreach (var result in node.Elements())
+        {
+            if (result.Name.LocalName == "UnitTestResult")
+            {
+                var serializer = new XmlSerializer(typeof(UnitTestResult), namespaces[""]);
+                var startNode = new XElement(result);
+                foreach (var ns in namespaces)
+                {
+                    XNamespace xns = XNamespace.Get(ns.Value);
+                    string prefix = ns.Key;
+                    if (!string.IsNullOrEmpty(prefix))
+                    {
+                        startNode.SetAttributeValue(XNamespace.Xmlns + prefix, xns);
+                    }
+                }
+                using (var reader = startNode.CreateReader())
+                {
+                    var unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
+                    results.Add(unitTestResult);
+                }
+            }
+            else
+            {
+                results.AddRange(ParseResults(result, namespaces));
+            }
+        }
+        return results;
+    }
+
     private async Task<bool> Do(string trxFilePath)
     {
-        await Task.Delay(10000);
         XDocument document;
         await using (var stream = File.OpenRead(trxFilePath))
         {
@@ -45,30 +87,8 @@ class TrxManager
         {
             return false;
         }
+        var results = ParseResults(root, new Dictionary<string, string>());
 
-        XNamespace ns = root.GetDefaultNamespace();
-        var results = document.Descendants(ns + "UnitTestResult");
-
-        foreach (var result in results)
-        {
-            string testName = result.Attribute("testName")?.Value;
-            string outcome = result.Attribute("outcome")?.Value;
-            ns = result.Name.Namespace;
-
-            if (outcome == "Failed")
-            {
-                var messageElem = result.Descendants(ns + "Message").FirstOrDefault();
-                var stackTraceElem = result.Descendants(ns + "StackTrace").FirstOrDefault();
-            }
-
-            if (outcome == "Warn")
-            {
-                var messageElem = result.Descendants(ns + "Message").FirstOrDefault();
-            }
-
-            var stdOutElem = result.Descendants(ns + "StdOut").FirstOrDefault();
-            output += stdOutElem?.Value;
-        }
         /*
         myResultManager.TestFinishing();
         myResultManager.TestException();
@@ -78,6 +98,7 @@ class TrxManager
 
         mySessionConductor.OpenSession(unitTestSession);
         */
+
         return true;
     }
     private async Task<RdCallResponse> HandleCall(Lifetime lt, RdCallRequest request)
