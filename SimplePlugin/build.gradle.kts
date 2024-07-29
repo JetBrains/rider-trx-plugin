@@ -17,7 +17,9 @@ plugins {
 }
 
 allprojects {
+
     repositories {
+        maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
         mavenCentral()
     }
 }
@@ -49,13 +51,32 @@ val riderSdkPath by lazy {
 
 dependencies {
     intellijPlatform {
-        rider(riderSdkVersion)
+        with(file("build/rider")) {
+            when {
+                exists() -> {
+                    logger.lifecycle("*** Using Rider SDK from local path $this")
+                    local(this)
+                }
+
+                else -> {
+                    logger.lifecycle("*** Using Rider SDK from intellij-snapshots repository")
+                    rider(riderSdkVersion)
+                }
+            }
+        }
+
         jetbrainsRuntime()
         instrumentationTools()
-        testFramework(TestFrameworkType.Platform.Bundled)
+        testFramework(TestFrameworkType.Bundled)
     }
     testImplementation(libs.openTest4J)
 }
+
+intellijPlatform {
+    this.instrumentCode = false
+    this.buildSearchableOptions = false
+}
+
 
 kotlin {
     jvmToolchain {

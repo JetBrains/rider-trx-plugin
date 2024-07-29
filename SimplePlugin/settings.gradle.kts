@@ -3,6 +3,7 @@ include(":protocol")
 
 pluginManagement {
     repositories {
+        maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
         gradlePluginPortal()
         mavenCentral()
     }

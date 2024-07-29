@@ -12,7 +12,6 @@ using Rider.Plugins.SimplePlugin.Model;
 using JetBrains.ReSharper.UnitTestFramework.Execution;
 using JetBrains.ReSharper.UnitTestFramework.Session;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
-using Rider.Plugins.SimplePlugin.TrxNodes;
 using System.Xml.Serialization;
 using UnitTestResult = Rider.Plugins.SimplePlugin.TrxNodes.UnitTestResult;
 
@@ -25,7 +24,6 @@ class TrxManager
     private readonly IUnitTestSessionConductor mySessionConductor;
     private readonly IUnitTestResultManager myResultManager;
     private readonly RdSimplePluginModel myModel;
-    private string output = "";
     public TrxManager(Lifetime lifetime, IUnitTestSessionRepository repository, IUnitTestSessionConductor sessionConductor,
         IUnitTestResultManager resultManager, ISolution solution)
     {
@@ -36,7 +34,7 @@ class TrxManager
         myModel.MyCall.SetAsync(HandleCall);
     }
 
-    List<UnitTestResult> ParseResults(XElement node, Dictionary<string, string> namespaces)
+    private List<UnitTestResult> ParseResults(XElement node, Dictionary<string, string> namespaces)
     {
         var results = new List<UnitTestResult>();
         foreach (var ns in node.Attributes().Where(a => a.IsNamespaceDeclaration))
