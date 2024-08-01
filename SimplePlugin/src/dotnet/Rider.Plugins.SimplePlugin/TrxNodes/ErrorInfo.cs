@@ -4,9 +4,7 @@ namespace Rider.Plugins.SimplePlugin.TrxNodes;
 
 public class ErrorInfo
 {
-    [XmlElement("Message")]
-    public string Message { get; set; }
+    [XmlElement("Message")] public string Message { get; set; }
 
-    [XmlElement("StackTrace")]
-    public string StackTrace { get; set; }
+    [XmlElement("StackTrace")] public string StackTrace { get; set; }
 }
