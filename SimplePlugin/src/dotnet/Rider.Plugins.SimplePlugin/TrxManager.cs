@@ -15,6 +15,7 @@ using JetBrains.ReSharper.UnitTestFramework.Session;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
+using JetBrains.ReSharper.Psi.VB.Tree;
 using JetBrains.ReSharper.TestRunner.Abstractions;
 using JetBrains.ReSharper.UnitTestFramework;
 using JetBrains.ReSharper.UnitTestFramework.Caching;
@@ -39,6 +40,7 @@ class TrxManager
     [NotNull] private readonly ILogger myLogger;
     [NotNull] private readonly IUnitTestResultManager myResultManager;
     [NotNull] private readonly RdSimplePluginModel myModel;
+    [NotNull] private readonly ISolution mySolution;
 
     public TrxManager(
         Lifetime lifetime,
@@ -59,6 +61,7 @@ class TrxManager
         myProjectCache = projectCache;
         myLogger = logger;
         myModel = solution.GetProtocolSolution().GetRdSimplePluginModel();
+        mySolution = solution;
         myModel.MyCall.SetAsync(HandleCall);
     }
 
@@ -91,6 +94,11 @@ class TrxManager
                 using (var reader = startNode.CreateReader())
                 {
                     var unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
+                    if (unitTestResult == null)
+                    {
+                        continue;
+                    }
+
                     results.Add(unitTestResult);
                 }
             }
@@ -148,6 +156,56 @@ class TrxManager
         }
     }
 
+    private void AddInnerResults(UnitTestResult result, ref List<UnitTestResult> results)
+    {
+        if (result.InnerResults == null)
+        {
+            return;
+        }
+
+        foreach (var innerResult in result.InnerResults.UnitTestResults)
+        {
+            results.Add(innerResult);
+            AddInnerResults(innerResult, ref results);
+        }
+    }
+
+    private IUnitTestElement AddParents(UnitTestResult current, ref IUnitTestTransaction tx,
+        ref HashSet<IUnitTestElement> elements)
+    {
+        UnitTestElementNamespace ns =
+            UnitTestElementNamespace.Create(current.Definition.TestMethod.ClassName);
+        TransientTestElement element = new TransientTestElement(current.TestName, ns)
+        {
+            NaturalId = UT.CreateId(myProjectCache.GetProject(mySolution.SolutionDirectory.ToString()),
+                TargetFrameworkId.Default,
+                (IUnitTestProvider)this.myTransientTestProvider,
+                current.Definition.TestMethod.ClassName + current.TestName)
+        };
+
+        if (elements.Contains(element))
+        {
+            return null;
+        }
+
+        if (current.InnerResults != null)
+        {
+            foreach (var child in current.InnerResults.UnitTestResults)
+            {
+                var childElement = AddParents(child, ref tx, ref elements);
+                if (childElement != null)
+                {
+                    childElement.Parent = (IUnitTestElement)element;
+                    tx.Create((IUnitTestElement)childElement);
+                    elements.Add((IUnitTestElement)childElement);
+                }
+            }
+        }
+
+        return element;
+    }
+
+
     private async Task<bool> HandleTrx(string trxFilePath)
     {
         XDocument document;
@@ -163,6 +221,12 @@ class TrxManager
         }
 
         var results = ParseResults(root, new Dictionary<string, string>());
+        var countOuterResults = results.Count;
+        for (int i = 0; i < countOuterResults; i++)
+        {
+            AddInnerResults(results[i], ref results);
+        }
+
         AddDefinitions(root, new Dictionary<string, string>(), ref results);
         await DisplayResults(new CancellationToken(), results);
 
@@ -175,23 +239,19 @@ class TrxManager
         {
             myElementRepository.Clear();
             IUnitTestSession session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported");
-            IProject project = this.myProjectCache.GetProject("Tra-la-la");
+            IProject project = this.myProjectCache.GetProject(mySolution.SolutionDirectory.ToString());
             HashSet<IUnitTestElement> elements = new HashSet<IUnitTestElement>();
             IUnitTestTransactionCommitResult transactionCommitResult = await this.myElementRepository.BeginTransaction(
                 (Action<IUnitTestTransaction>)(tx =>
                 {
                     foreach (var result in results)
                     {
-                        UnitTestElementNamespace ns =
-                            UnitTestElementNamespace.Create(result.Definition.TestMethod.ClassName);
-                        TransientTestElement element = new TransientTestElement(result.TestName, ns)
+                        var outerElement = AddParents(result, ref tx, ref elements);
+                        if (outerElement != null)
                         {
-                            NaturalId = UT.CreateId(project, TargetFrameworkId.Default,
-                                (IUnitTestProvider)this.myTransientTestProvider,
-                                result.Definition.TestMethod.ClassName + result.TestName)
-                        };
-                        tx.Create((IUnitTestElement)element);
-                        elements.Add((IUnitTestElement)element);
+                            tx.Create(outerElement);
+                            elements.Add(outerElement);
+                        }
                     }
                 }), ct);
             UT.Facade.Append(
