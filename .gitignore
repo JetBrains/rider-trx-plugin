@@ -1,5 +1,12 @@
-.idea/
+/.idea/
+/.gradle/
+/.intellijPlatform/
 
 bin/
 obj/
-output/
+build/
+
+/src/rider/generated/**/*.Generated.kt
+/src/dotnet/Rider.Plugins.TrxPlugin/Model/**/*.Generated.cs
+
+/src/dotnet/nuget.config
