@@ -226,7 +226,6 @@ class TrxManager
         {
             AddInnerResults(results[i], ref results);
         }
-
         AddDefinitions(root, new Dictionary<string, string>(), ref results);
         await DisplayResults(new CancellationToken(), results);
 
@@ -271,7 +270,7 @@ class TrxManager
                 switch (result.Outcome.ToLower())
                 {
                     case "passed":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Success, null,
+                        myResultManager.TestFinishing(element, session, UnitTestStatus.Success, result.Output?.StdOut,
                             TimeSpan.Parse(result.Duration));
                         break;
                     case "failed":
@@ -299,9 +298,22 @@ class TrxManager
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Pending,
                             null, TimeSpan.Parse(result.Duration));
                         break;
+                    case "notexecuted":
+                        myResultManager.TestFinishing(element, session, UnitTestStatus.Ignored,
+                            result.Output?.ErrorInfo?.Message);
+                        break;
                     default:
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
-                            null, TimeSpan.Parse(result.Duration));
+                        if (result.Duration != null)
+                        {
+                            myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
+                                null, TimeSpan.Parse(result.Duration));
+                        }
+                        else
+                        {
+                            myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
+                                null);
+                        }
+
                         break;
                 }
             }
