@@ -9,8 +9,9 @@ using JetBrains.ReSharper.UnitTestFramework.Session;
 using JetBrains.ReSharper.UnitTestFramework.Transient;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
 using JetBrains.Rider.Model;
-using Rider.Plugins.TrxPlugin;
 using Moq;
+using NUnit.Framework;
+using Rider.Plugins.TrxPlugin;
 using ILogger = JetBrains.ReSharper.TestRunner.Abstractions.ILogger;
 
 
