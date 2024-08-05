@@ -30,7 +30,7 @@ using UnitTestResult = Rider.Plugins.TrxPlugin.TrxNodes.UnitTestResult;
 namespace Rider.Plugins.TrxPlugin;
 
 [SolutionComponent]
-class TrxManager
+public class TrxManager
 {
     [NotNull] private readonly TransientTestProvider myTransientTestProvider;
     [NotNull] private readonly IUnitTestElementRepository myElementRepository;
@@ -65,7 +65,7 @@ class TrxManager
         myModel.MyCall.SetAsync(HandleCall);
     }
 
-    private List<UnitTestResult> ParseResults(XElement node, Dictionary<string, string> namespaces)
+    public List<UnitTestResult> ParseResults(XElement node, Dictionary<string, string> namespaces)
     {
         var results = new List<UnitTestResult>();
         foreach (var ns in node.Attributes().Where(a => a.IsNamespaceDeclaration))
