@@ -24,6 +24,7 @@ using JetBrains.ReSharper.UnitTestFramework.Elements;
 using JetBrains.ReSharper.UnitTestFramework.Persistence;
 using JetBrains.ReSharper.UnitTestFramework.Transient;
 using JetBrains.Util.Dotnet.TargetFrameworkIds;
+using JetBrains.Util.Logging.Listeners;
 using Rider.Plugins.TrxPlugin.TrxNodes;
 using UnitTestResult = Rider.Plugins.TrxPlugin.TrxNodes.UnitTestResult;
 
@@ -77,9 +78,13 @@ public class TrxManager
 
         foreach (var result in node.Elements())
         {
-            if (result.Name.LocalName == "UnitTestResult")
-            {
-                var serializer = new XmlSerializer(typeof(UnitTestResult), namespaces[""]);
+            if (result.Name.LocalName == "UnitTestResult"){
+                var serializer = new XmlSerializer(typeof(UnitTestResult));
+                if (namespaces.TryGetValue("", out var ns1))
+                {
+                    serializer = new XmlSerializer(typeof(UnitTestResult), ns1);
+                }
+
                 var startNode = new XElement(result);
                 foreach (var ns in namespaces)
                 {
@@ -125,7 +130,11 @@ public class TrxManager
         {
             if (element.Name.LocalName == "UnitTest")
             {
-                var serializer = new XmlSerializer(typeof(UnitTest), namespaces[""]);
+                var serializer = new XmlSerializer(typeof(UnitTest));
+                if (namespaces.TryGetValue("", out var ns1))
+                {
+                    serializer = new XmlSerializer(typeof(UnitTest), ns1);
+                }
                 var startNode = new XElement(element);
                 foreach (var ns in namespaces)
                 {
@@ -226,6 +235,7 @@ public class TrxManager
         {
             AddInnerResults(results[i], ref results);
         }
+
         AddDefinitions(root, new Dictionary<string, string>(), ref results);
         await DisplayResults(new CancellationToken(), results);
 
@@ -267,52 +277,48 @@ public class TrxManager
                     continue;
                 }
 
-                switch (result.Outcome.ToLower())
+                switch (result.Outcome?.ToLower())
                 {
+                    case null:
+                        break;
                     case "passed":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Success, result.Output?.StdOut,
                             TimeSpan.Parse(result.Duration));
                         break;
                     case "failed":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Failed,
-                            result.Output.ErrorInfo.Message, TimeSpan.Parse(result.Duration));
+                            result.Output?.ErrorInfo?.Message, TimeSpan.Parse(result.Duration ?? "0"));
                         var exceptions = new List<TestException>
                         {
-                            new TestException(null, result.Output.ErrorInfo.Message, result.Output.ErrorInfo.StackTrace)
+                            new TestException(null, result.Output?.ErrorInfo?.Message,
+                                result.Output?.ErrorInfo?.StackTrace)
                         };
                         myResultManager.TestException(element, session, exceptions);
                         break;
                     case "aborted":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Aborted,
-                            null, TimeSpan.Parse(result.Duration));
+                            null, TimeSpan.Parse(result.Duration ?? "0"));
                         break;
                     case "running":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Running,
-                            null, TimeSpan.Parse(result.Duration));
+                            null, TimeSpan.Parse(result.Duration ?? "0"));
                         break;
                     case "inconclusive":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Inconclusive, null,
-                            TimeSpan.Parse(result.Duration));
+                            TimeSpan.Parse(result.Duration ?? "0"));
                         break;
                     case "pending":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Pending,
-                            null, TimeSpan.Parse(result.Duration));
+                            null, TimeSpan.Parse(result.Duration ?? "0"));
                         break;
                     case "notexecuted":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Ignored,
                             result.Output?.ErrorInfo?.Message);
                         break;
                     default:
-                        if (result.Duration != null)
-                        {
-                            myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
-                                null, TimeSpan.Parse(result.Duration));
-                        }
-                        else
-                        {
-                            myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
-                                null);
-                        }
+                        myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
+                            null, TimeSpan.Parse(result.Duration ?? "0"));
+
 
                         break;
                 }
