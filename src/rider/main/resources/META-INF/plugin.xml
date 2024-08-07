@@ -2,6 +2,9 @@
     <applicationListeners>
         <listener class="TrxFileDropHandler" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
+    <extensions defaultExtensionNs="com.intellij">
+        <editorNotificationProvider implementation="TrxFileNotificationProvider"/>
+    </extensions>
     <id>com.jetbrains.rider.plugins.trxplugin</id>
     <name>RiderTrxPlugin</name>
     <version>_PLACEHOLDER_</version>
