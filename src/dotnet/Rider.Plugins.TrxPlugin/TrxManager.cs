@@ -96,15 +96,22 @@ public class TrxManager
                     }
                 }
 
-                using (var reader = startNode.CreateReader())
+                try
                 {
-                    var unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
-                    if (unitTestResult == null)
+                    using (var reader = startNode.CreateReader())
                     {
-                        continue;
-                    }
+                        var unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
+                        if (unitTestResult == null)
+                        {
+                            continue;
+                        }
 
-                    results.Add(unitTestResult);
+                        results.Add(unitTestResult);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    myLogger.Error(ex);
                 }
             }
             else
@@ -146,16 +153,23 @@ public class TrxManager
                     }
                 }
 
-                using (var reader = startNode.CreateReader())
+                try
                 {
-                    var unitTest = (UnitTest)serializer.Deserialize(reader);
-                    foreach (var result in results)
+                    using (var reader = startNode.CreateReader())
                     {
-                        if (result.Id == unitTest?.Execution.Id)
+                        var unitTest = (UnitTest)serializer.Deserialize(reader);
+                        foreach (var result in results)
                         {
-                            result.Definition = unitTest;
+                            if (result.Id == unitTest?.Execution.Id)
+                            {
+                                result.Definition = unitTest;
+                            }
                         }
                     }
+                }
+                catch (Exception ex)
+                {
+                    myLogger.Error(ex);
                 }
             }
             else
@@ -218,9 +232,16 @@ public class TrxManager
     private async Task<bool> HandleTrx(string trxFilePath)
     {
         XDocument document;
-        await using (var stream = File.OpenRead(trxFilePath))
+        try
         {
-            document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
+            await using (var stream = File.OpenRead(trxFilePath))
+            {
+                document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
+            }
+        } catch (Exception ex)
+        {
+            myLogger.Error(ex);
+            return false;
         }
 
         var root = document.Root;
@@ -248,7 +269,6 @@ public class TrxManager
         {
             myElementRepository.Clear();
             IUnitTestSession session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported");
-            IProject project = this.myProjectCache.GetProject(mySolution.SolutionDirectory.ToString());
             HashSet<IUnitTestElement> elements = new HashSet<IUnitTestElement>();
             IUnitTestTransactionCommitResult transactionCommitResult = await this.myElementRepository.BeginTransaction(
                 (Action<IUnitTestTransaction>)(tx =>
