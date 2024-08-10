@@ -78,7 +78,8 @@ public class TrxManager
 
         foreach (var result in node.Elements())
         {
-            if (result.Name.LocalName == "UnitTestResult"){
+            if (result.Name.LocalName == "UnitTestResult")
+            {
                 var serializer = new XmlSerializer(typeof(UnitTestResult));
                 if (namespaces.TryGetValue("", out var ns1))
                 {
@@ -142,6 +143,7 @@ public class TrxManager
                 {
                     serializer = new XmlSerializer(typeof(UnitTest), ns1);
                 }
+
                 var startNode = new XElement(element);
                 foreach (var ns in namespaces)
                 {
@@ -238,7 +240,8 @@ public class TrxManager
             {
                 document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
             }
-        } catch (Exception ex)
+        }
+        catch (Exception ex)
         {
             myLogger.Error(ex);
             return false;
@@ -268,7 +271,8 @@ public class TrxManager
         try
         {
             myElementRepository.Clear();
-            IUnitTestSession session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported");
+            IUnitTestSession
+                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported"); // TODO
             HashSet<IUnitTestElement> elements = new HashSet<IUnitTestElement>();
             IUnitTestTransactionCommitResult transactionCommitResult = await this.myElementRepository.BeginTransaction(
                 (Action<IUnitTestTransaction>)(tx =>

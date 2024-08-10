@@ -16,7 +16,7 @@ using ILogger = JetBrains.ReSharper.TestRunner.Abstractions.ILogger;
 
 namespace Tests;
 
-public class Tests
+public class TestParseResults
 {
     private TrxManager _trxManager;
     private int _passed;
@@ -109,4 +109,57 @@ public class Tests
         Assert.That(_failed, Is.EqualTo(13));
         Assert.That(_warning, Is.EqualTo(1));
     }
+
+    [Test]
+    public void Test3()
+    {
+        XDocument document;
+        using (var stream = File.OpenRead("../../../TestData/test3.trx"))
+        {
+            document = XDocument.Load(stream);
+        }
+
+        var root = document.Root;
+
+        var results = _trxManager.ParseResults(root, new Dictionary<string, string>());
+        Assert.That(results.Count, Is.EqualTo(2));
+        Assert.That(results[1].TestName, Is.EqualTo("IndependentTest"));
+        Assert.That(results[1].Outcome, Is.EqualTo("Passed"));
+        Assert.That(results[0].TestName, Is.EqualTo("MainTest"));
+        Assert.That(results[0].Outcome, Is.EqualTo("Failed"));
+        Assert.That(results[0].InnerResults?.UnitTestResults?.Count, Is.EqualTo(2));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].TestName, Is.EqualTo("SubTest1"));
+        Assert.That(results[0].InnerResults.UnitTestResults[1].TestName, Is.EqualTo("SubTest2"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].Outcome, Is.EqualTo("Passed"));
+        Assert.That(results[0].InnerResults.UnitTestResults[1].Outcome, Is.EqualTo("Failed"));
+    }
+
+    [Test]
+    public void Test4()
+    {
+        XDocument document;
+        using (var stream = File.OpenRead("../../../TestData/test4.trx"))
+        {
+            document = XDocument.Load(stream);
+        }
+
+        var root = document.Root;
+
+        var results = _trxManager.ParseResults(root, new Dictionary<string, string>());
+        Assert.That(results.Count, Is.EqualTo(1));
+        Assert.That(results[0].TestName, Is.EqualTo("MainTest"));
+        Assert.That(results[0].Outcome, Is.EqualTo("Failed"));
+        Assert.That(results[0].InnerResults?.UnitTestResults?.Count, Is.EqualTo(2));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].TestName, Is.EqualTo("SubTest1"));
+        Assert.That(results[0].InnerResults.UnitTestResults[1].TestName, Is.EqualTo("SubTest2"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].Outcome, Is.EqualTo("Failed"));
+        Assert.That(results[0].InnerResults.UnitTestResults[1].Outcome, Is.EqualTo("Failed"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults?.UnitTestResults?.Count, Is.EqualTo(2));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[0].TestName, Is.EqualTo("SubSubTest1"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].TestName, Is.EqualTo("SubSubTest2"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[0].Outcome, Is.EqualTo("Passed"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].Outcome, Is.EqualTo("Failed"));
+    }
+
+
 }

@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TestRun id="12345678-1234-1234-1234-123456789012" name="ComplexTestRun" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+  <Times creation="2023-10-01T12:00:00.000Z" queuing="2023-10-01T12:00:00.000Z" start="2023-10-01T12:00:00.000Z" finish="2023-10-01T12:00:00.000Z" />
+  <TestSettings name="TestSettings1" id="2" />
+  <Results>
+    <UnitTestResult executionId="1" testId="1" testName="MainTest" computerName="TestComputer" duration="0.00:01:00" startTime="2023-10-01T12:00:00.000Z" endTime="2023-10-01T12:01:00.000Z" outcome="Failed">
+      <Output>
+        <StdOut>Main test output</StdOut>
+        <StdErr>Main test error</StdErr>
+        <ErrorInfo>
+          <Message>Main test failed due to an error</Message>
+          <StackTrace>Stack trace of the main test failure</StackTrace>
+        </ErrorInfo>
+      </Output>
+      <InnerResults>
+        <UnitTestResult executionId="2" testId="2" testName="SubTest1" computerName="TestComputer" duration="0.00:00:30" startTime="2023-10-01T12:00:00.000Z" endTime="2023-10-01T12:00:30.000Z" outcome="Passed">
+          <Output>
+            <StdOut>SubTest1 output</StdOut>
+          </Output>
+        </UnitTestResult>
+        <UnitTestResult executionId="3" testId="3" testName="SubTest2" computerName="TestComputer" duration="0.00:00:30" startTime="2023-10-01T12:00:30.000Z" endTime="2023-10-01T12:01:00.000Z" outcome="Failed">
+          <Output>
+            <StdOut>SubTest2 output</StdOut>
+            <StdErr>SubTest2 error</StdErr>
+            <ErrorInfo>
+              <Message>SubTest2 failed due to an error</Message>
+              <StackTrace>Stack trace of the SubTest2 failure</StackTrace>
+            </ErrorInfo>
+          </Output>
+        </UnitTestResult>
+      </InnerResults>
+    </UnitTestResult>
+    <UnitTestResult executionId="4" testId="4" testName="IndependentTest" computerName="TestComputer" duration="0.00:00:45" startTime="2023-10-01T12:01:00.000Z" endTime="2023-10-01T12:01:45.000Z" outcome="Passed">
+      <Output>
+        <StdOut>Independent test output</StdOut>
+      </Output>
+    </UnitTestResult>
+  </Results>
+  <TestDefinitions>
+    <UnitTest name="MainTest" id="1">
+      <Execution id="1" />
+      <TestMethod codeBase="TestProject.dll" adapterTypeName="executor://mstestadapter/v1" className="TestNamespace.TestClass" name="MainTest" />
+    </UnitTest>
+    <UnitTest name="SubTest1" id="2">
+      <Execution id="2" />
+      <TestMethod codeBase="TestProject.dll" adapterTypeName="executor://mstestadapter/v1" className="TestNamespace.TestClass" name="SubTest1" />
+    </UnitTest>
+    <UnitTest name="SubTest2" id="3">
+      <Execution id="3" />
+      <TestMethod codeBase="TestProject.dll" adapterTypeName="executor://mstestadapter/v1" className="TestNamespace.TestClass" name="SubTest2" />
+    </UnitTest>
+    <UnitTest name="IndependentTest" id="4">
+      <Execution id="4" />
+      <TestMethod codeBase="TestProject.dll" adapterTypeName="executor://mstestadapter/v1" className="TestNamespace.TestClass" name="IndependentTest" />
+    </UnitTest>
+  </TestDefinitions>
+  <TestEntries>
+    <TestEntry testId="1" executionId="1" testListId="1" />
+    <TestEntry testId="2" executionId="2" testListId="1" />
+    <TestEntry testId="3" executionId="3" testListId="1" />
+    <TestEntry testId="4" executionId="4" testListId="2" />
+  </TestEntries>
+  <TestLists>
+    <TestList name="Main Tests" id="1" />
+    <TestList name="Independent Tests" id="2" />
+  </TestLists>
+</TestRun>
