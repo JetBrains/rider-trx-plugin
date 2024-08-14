@@ -15,19 +15,15 @@ using JetBrains.ReSharper.UnitTestFramework.Session;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
-using JetBrains.ReSharper.Psi.EditorConfig;
-using JetBrains.ReSharper.Psi.VB.Tree;
 using JetBrains.ReSharper.TestRunner.Abstractions;
 using JetBrains.ReSharper.UnitTestFramework;
 using JetBrains.ReSharper.UnitTestFramework.Caching;
 using JetBrains.ReSharper.UnitTestFramework.Criteria;
 using JetBrains.ReSharper.UnitTestFramework.Elements;
 using JetBrains.ReSharper.UnitTestFramework.Persistence;
-using JetBrains.ReSharper.UnitTestFramework.Settings;
 using JetBrains.ReSharper.UnitTestFramework.Transient;
 using JetBrains.ReSharper.UnitTestFramework.UI.ViewModels;
 using JetBrains.Util.Dotnet.TargetFrameworkIds;
-using JetBrains.Util.Logging.Listeners;
 using Rider.Plugins.TrxPlugin.TrxNodes;
 using UnitTestResult = Rider.Plugins.TrxPlugin.TrxNodes.UnitTestResult;
 
@@ -309,8 +305,8 @@ public class TrxManager
                     case null:
                         break;
                     case "passed":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Success, result.Output?.StdOut,
-                            TimeSpan.Parse(result.Duration));
+                        myResultManager.TestFinishing(element, session, UnitTestStatus.Success, null,
+                            TimeSpan.Parse(result.Duration ?? "0"));
                         break;
                     case "failed":
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Failed,
@@ -345,12 +341,10 @@ public class TrxManager
                     default:
                         myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
                             null, TimeSpan.Parse(result.Duration ?? "0"));
-
-
                         break;
                 }
+                myResultManager.TestOutput(element, session, result.Output?.StdOut, TestOutputType.STDOUT);
             }
-
 
             IUnitTestSessionTreeViewModel sessionTreeViewModel = await this.mySessionConductor.OpenSession(session);
             sessionTreeViewModel.Grouping.Value = new UnitTestingGroupingSelection(UnitTestSessionTreeGroupings
