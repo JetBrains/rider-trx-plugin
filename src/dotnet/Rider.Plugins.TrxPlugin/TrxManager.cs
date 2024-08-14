@@ -15,6 +15,7 @@ using JetBrains.ReSharper.UnitTestFramework.Session;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
+using JetBrains.ReSharper.Psi.EditorConfig;
 using JetBrains.ReSharper.Psi.VB.Tree;
 using JetBrains.ReSharper.TestRunner.Abstractions;
 using JetBrains.ReSharper.UnitTestFramework;
@@ -22,7 +23,9 @@ using JetBrains.ReSharper.UnitTestFramework.Caching;
 using JetBrains.ReSharper.UnitTestFramework.Criteria;
 using JetBrains.ReSharper.UnitTestFramework.Elements;
 using JetBrains.ReSharper.UnitTestFramework.Persistence;
+using JetBrains.ReSharper.UnitTestFramework.Settings;
 using JetBrains.ReSharper.UnitTestFramework.Transient;
+using JetBrains.ReSharper.UnitTestFramework.UI.ViewModels;
 using JetBrains.Util.Dotnet.TargetFrameworkIds;
 using JetBrains.Util.Logging.Listeners;
 using Rider.Plugins.TrxPlugin.TrxNodes;
@@ -348,7 +351,11 @@ public class TrxManager
                 }
             }
 
+
             IUnitTestSessionTreeViewModel sessionTreeViewModel = await this.mySessionConductor.OpenSession(session);
+            sessionTreeViewModel.Grouping.Value = new UnitTestingGroupingSelection(UnitTestSessionTreeGroupings
+                .GetSessionProviders(mySolution, session)
+                .Where(p => p.Key == "Namespace").ToArray());
             session = (IUnitTestSession)null;
         }
         catch (Exception ex)
