@@ -64,7 +64,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, new Dictionary<string, string>());
+        var results = _trxManager.ParseResults(root);
         Assert.That(results.Count, Is.EqualTo(1));
         Assert.That(results[0].TestName, Is.EqualTo("ParentTest"));
         Assert.That(results[0].Outcome, Is.EqualTo("Passed"));
@@ -85,7 +85,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, new Dictionary<string, string>());
+        var results = _trxManager.ParseResults(root);
         Assert.That(results.Count, Is.EqualTo(20));
         foreach (var result in results)
         {
@@ -121,7 +121,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, new Dictionary<string, string>());
+        var results = _trxManager.ParseResults(root);
         Assert.That(results.Count, Is.EqualTo(2));
         Assert.That(results[1].TestName, Is.EqualTo("IndependentTest"));
         Assert.That(results[1].Outcome, Is.EqualTo("Passed"));
@@ -145,7 +145,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, new Dictionary<string, string>());
+        var results = _trxManager.ParseResults(root);
         Assert.That(results.Count, Is.EqualTo(1));
         Assert.That(results[0].TestName, Is.EqualTo("MainTest"));
         Assert.That(results[0].Outcome, Is.EqualTo("Failed"));

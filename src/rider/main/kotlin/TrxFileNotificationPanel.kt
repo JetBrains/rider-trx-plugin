@@ -1,7 +1,7 @@
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
-import com.jetbrains.rider.plugins.trxplugin.ProtocolCaller
+import com.jetbrains.rider.plugins.trxplugin.TrxImportService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -14,8 +14,8 @@ class TrxFileNotificationPanel(project: Project, file: VirtualFile) : EditorNoti
         text = "Import this TRX as unit test session"
         createActionLabel("Import") {
             launch {
-                val protocolCaller = project.getService(ProtocolCaller::class.java)
-                val response = protocolCaller.doCall(file.path)
+                val trxImportService = project.getService(TrxImportService::class.java)
+                val response = trxImportService.importTrx(file.path)
             }
         }
     }

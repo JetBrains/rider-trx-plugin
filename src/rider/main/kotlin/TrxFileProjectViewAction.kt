@@ -2,7 +2,7 @@ import com.intellij.openapi.actionSystem.ActionUpdateThread
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
-import com.jetbrains.rider.plugins.trxplugin.ProtocolCaller
+import com.jetbrains.rider.plugins.trxplugin.TrxImportService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -18,8 +18,8 @@ class TrxFileProjectViewAction : AnAction("Import this TRX as unit test session"
         val file = event.getData(CommonDataKeys.VIRTUAL_FILE)
         val project = event.project
         launch {
-            val protocolCaller = project?.getService(ProtocolCaller::class.java)
-            val response = file?.let { protocolCaller?.doCall(it.path) }
+            val trxImportService = project?.getService(TrxImportService::class.java)
+            val response = file?.let { trxImportService?.importTrx(it.path) }
         }
     }
 

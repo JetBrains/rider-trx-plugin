@@ -65,40 +65,19 @@ public class TrxManager
         myLogger = logger;
         myModel = solution.GetProtocolSolution().GetRdTrxPluginModel();
         mySolution = solution;
-        myModel.MyCall.SetAsync(HandleCall);
+        myModel.ImportTrxCall.SetAsync(HandleCall);
     }
 
-    public List<UnitTestResult> ParseResults(XElement node, Dictionary<string, string> namespaces)
+    public List<UnitTestResult> ParseResults(XElement node)
     {
         var results = new List<UnitTestResult>();
-        foreach (var ns in node.Attributes().Where(a => a.IsNamespaceDeclaration))
-        {
-            var prefix = ns.Name.LocalName == "xmlns" ? "" : ns.Name.LocalName;
-            var namespaceUri = ns.Value;
-            namespaces[prefix] = namespaceUri;
-        }
-
         foreach (var result in node.Elements())
         {
             if (result.Name.LocalName == "UnitTestResult")
             {
-                var serializer = new XmlSerializer(typeof(UnitTestResult));
-                if (namespaces.TryGetValue("", out var ns1))
-                {
-                    serializer = new XmlSerializer(typeof(UnitTestResult), ns1);
-                }
-
+                var serializer = new XmlSerializer(typeof(UnitTestResult),
+                    "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
                 var startNode = new XElement(result);
-                foreach (var ns in namespaces)
-                {
-                    XNamespace xns = XNamespace.Get(ns.Value);
-                    string prefix = ns.Key;
-                    if (!string.IsNullOrEmpty(prefix))
-                    {
-                        startNode.SetAttributeValue(XNamespace.Xmlns + prefix, xns);
-                    }
-                }
-
                 try
                 {
                     using (var reader = startNode.CreateReader())
@@ -119,44 +98,22 @@ public class TrxManager
             }
             else
             {
-                results.AddRange(ParseResults(result, namespaces));
+                results.AddRange(ParseResults(result));
             }
         }
 
         return results;
     }
 
-    private void AddDefinitions(XElement node, Dictionary<string, string> namespaces,
-        List<UnitTestResult> results)
+    private void AddDefinitions(XElement node, List<UnitTestResult> results)
     {
-        foreach (var ns in node.Attributes().Where(a => a.IsNamespaceDeclaration))
-        {
-            var prefix = ns.Name.LocalName == "xmlns" ? "" : ns.Name.LocalName;
-            var namespaceUri = ns.Value;
-            namespaces[prefix] = namespaceUri;
-        }
 
         foreach (var element in node.Elements())
         {
             if (element.Name.LocalName == "UnitTest")
             {
-                var serializer = new XmlSerializer(typeof(UnitTest));
-                if (namespaces.TryGetValue("", out var ns1))
-                {
-                    serializer = new XmlSerializer(typeof(UnitTest), ns1);
-                }
-
+                var serializer = new XmlSerializer(typeof(UnitTest), "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
                 var startNode = new XElement(element);
-                foreach (var ns in namespaces)
-                {
-                    XNamespace xns = XNamespace.Get(ns.Value);
-                    string prefix = ns.Key;
-                    if (!string.IsNullOrEmpty(prefix))
-                    {
-                        startNode.SetAttributeValue(XNamespace.Xmlns + prefix, xns);
-                    }
-                }
-
                 try
                 {
                     using (var reader = startNode.CreateReader())
@@ -178,7 +135,7 @@ public class TrxManager
             }
             else
             {
-                AddDefinitions(element, namespaces, results);
+                AddDefinitions(element, results);
             }
         }
     }
@@ -197,8 +154,7 @@ public class TrxManager
         }
     }
 
-    private IUnitTestElement TestElementCreator(UnitTestResult current, ref IUnitTestTransaction tx,
-        ref HashSet<IUnitTestElement> elements)
+    private IUnitTestElement TestElementCreator(UnitTestResult current, IUnitTestTransaction tx, HashSet<IUnitTestElement> elements)
     {
         UnitTestElementNamespace ns =
             UnitTestElementNamespace.Create(current.Definition.TestMethod.ClassName);
@@ -219,7 +175,7 @@ public class TrxManager
         {
             foreach (var child in current.InnerResults.UnitTestResults)
             {
-                var childElement = TestElementCreator(child, ref tx, ref elements);
+                var childElement = TestElementCreator(child, tx, elements);
                 if (childElement != null)
                 {
                     childElement.Parent = (IUnitTestElement)element;
@@ -255,14 +211,14 @@ public class TrxManager
             return false;
         }
 
-        var results = ParseResults(root, new Dictionary<string, string>());
+        var results = ParseResults(root);
         var countOuterResults = results.Count;
         for (int i = 0; i < countOuterResults; i++)
         {
             AddInnerResults(results[i], results);
         }
 
-        AddDefinitions(root, new Dictionary<string, string>(), results);
+        AddDefinitions(root, results);
         await DisplayResults((CancellationToken)myLifetime, results);
         return true;
     }
@@ -271,16 +227,16 @@ public class TrxManager
     {
         try
         {
-            // myElementRepository.Clear();
+            myElementRepository.Clear();
             IUnitTestSession
-                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported"); // TODO
+                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported");
             HashSet<IUnitTestElement> elements = new HashSet<IUnitTestElement>();
             IUnitTestTransactionCommitResult transactionCommitResult = await this.myElementRepository.BeginTransaction(
                 (Action<IUnitTestTransaction>)(tx =>
                 {
                     foreach (var result in results)
                     {
-                        var outerElement = TestElementCreator(result, ref tx, ref elements);
+                        var outerElement = TestElementCreator(result, tx, elements);
                         if (outerElement != null)
                         {
                             tx.Create(outerElement);
@@ -364,7 +320,7 @@ public class TrxManager
 
     private async Task<RdCallResponse> HandleCall(Lifetime lt, RdCallRequest request)
     {
-        string path = request.MyField;
+        string path = request.TrxPath;
         if (await HandleTrx(path))
         {
             return lt.Execute(() => new RdCallResponse("Success"));

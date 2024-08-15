@@ -7,12 +7,12 @@ import com.jetbrains.rider.plugins.trxplugin.model.rdTrxPluginModel
 import com.jetbrains.rider.projectView.solution
 
 @Service(Service.Level.PROJECT)
-class ProtocolCaller(private val project: Project) {
+class TrxImportService(private val project: Project) {
 
-    suspend fun doCall(input: String): String {
+    suspend fun importTrx(input: String): String {
         val model = project.solution.rdTrxPluginModel
         val request = RdCallRequest(input)
-        val response = model.myCall.startSuspending(request)
-        return response.myResult
+        val response = model.importTrxCall.startSuspending(request)
+        return response.result
     }
 }

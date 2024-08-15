@@ -10,18 +10,17 @@ import com.jetbrains.rider.model.nova.ide.SolutionModel
 @Suppress("unused")
 object RdTrxPluginModel : Ext(SolutionModel.Solution) {
     private val RdCallRequest = structdef {
-        field("myField", string)
+        field("trxPath", string)
     }
 
     private val RdCallResponse = structdef {
-        field("myResult", string)
+        field("result", string)
     }
 
     init {
         setting(Kotlin11Generator.Namespace, "com.jetbrains.rider.plugins.trxplugin.model")
         setting(CSharp50Generator.Namespace, "Rider.Plugins.TrxPlugin.Model")
 
-        call("myCall", RdCallRequest, RdCallResponse)
-            .doc("This is an example protocol call.")
+        call("importTrxCall", RdCallRequest, RdCallResponse)
     }
 }
