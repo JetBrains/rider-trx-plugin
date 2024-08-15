@@ -11,7 +11,7 @@ using JetBrains.ReSharper.UnitTestFramework.UI.Session;
 using JetBrains.Rider.Model;
 using Moq;
 using Rider.Plugins.TrxPlugin;
-using ILogger = JetBrains.ReSharper.TestRunner.Abstractions.ILogger;
+using ILogger = JetBrains.Util.ILogger;
 
 
 namespace Tests;
