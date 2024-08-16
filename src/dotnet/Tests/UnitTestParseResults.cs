@@ -155,11 +155,13 @@ public class TestParseResults
         Assert.That(results[0].InnerResults.UnitTestResults[0].Outcome, Is.EqualTo("Failed"));
         Assert.That(results[0].InnerResults.UnitTestResults[1].Outcome, Is.EqualTo("Failed"));
         Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults?.UnitTestResults?.Count, Is.EqualTo(2));
-        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[0].TestName, Is.EqualTo("SubSubTest1"));
-        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].TestName, Is.EqualTo("SubSubTest2"));
-        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[0].Outcome, Is.EqualTo("Passed"));
-        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].Outcome, Is.EqualTo("Failed"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[0].TestName,
+            Is.EqualTo("SubSubTest1"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].TestName,
+            Is.EqualTo("SubSubTest2"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[0].Outcome,
+            Is.EqualTo("Passed"));
+        Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].Outcome,
+            Is.EqualTo("Failed"));
     }
-
-
 }

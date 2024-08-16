@@ -107,12 +107,12 @@ public class TrxManager
 
     private void AddDefinitions(XElement node, List<UnitTestResult> results)
     {
-
         foreach (var element in node.Elements())
         {
             if (element.Name.LocalName == "UnitTest")
             {
-                var serializer = new XmlSerializer(typeof(UnitTest), "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
+                var serializer = new XmlSerializer(typeof(UnitTest),
+                    "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
                 var startNode = new XElement(element);
                 try
                 {
@@ -154,7 +154,8 @@ public class TrxManager
         }
     }
 
-    private IUnitTestElement TestElementCreator(UnitTestResult current, IUnitTestTransaction tx, HashSet<IUnitTestElement> elements)
+    private IUnitTestElement TestElementCreator(UnitTestResult current, IUnitTestTransaction tx,
+        HashSet<IUnitTestElement> elements, string testRunId)
     {
         UnitTestElementNamespace ns =
             UnitTestElementNamespace.Create(current.Definition.TestMethod.ClassName);
@@ -163,19 +164,24 @@ public class TrxManager
             NaturalId = UT.CreateId(myProjectCache.GetProject(mySolution.SolutionDirectory.ToString()),
                 TargetFrameworkId.Default,
                 (IUnitTestProvider)this.myTransientTestProvider,
-                current.Definition.TestMethod.ClassName + current.TestName)
+                testRunId + current.Definition.TestMethod.ClassName + current.TestName)
         };
-
         if (elements.Contains(element))
         {
             return null;
+        }
+
+        var existingElement = myElementRepository.GetBy(element.NaturalId);
+        if (existingElement != null)
+        {
+            myElementRepository.Remove(new List<IUnitTestElement> { existingElement });
         }
 
         if (current.InnerResults != null)
         {
             foreach (var child in current.InnerResults.UnitTestResults)
             {
-                var childElement = TestElementCreator(child, tx, elements);
+                var childElement = TestElementCreator(child, tx, elements, testRunId);
                 if (childElement != null)
                 {
                     childElement.Parent = (IUnitTestElement)element;
@@ -219,24 +225,30 @@ public class TrxManager
         }
 
         AddDefinitions(root, results);
-        await DisplayResults((CancellationToken)myLifetime, results);
+        await DisplayResults((CancellationToken)myLifetime, results, root.Attribute("id")?.Value);
         return true;
     }
 
-    private async Task DisplayResults(CancellationToken ct, List<UnitTestResult> results)
+    private async Task DisplayResults(CancellationToken ct, List<UnitTestResult> results, string id)
     {
         try
         {
-            myElementRepository.Clear();
+            var existingSession = mySessionRepository.GetById(new Guid(id));
+            if (existingSession != null)
+            {
+                mySessionRepository.DestroySession(existingSession);
+            }
+
             IUnitTestSession
-                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported");
+                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported", new Guid(id));
+
             HashSet<IUnitTestElement> elements = new HashSet<IUnitTestElement>();
             IUnitTestTransactionCommitResult transactionCommitResult = await this.myElementRepository.BeginTransaction(
                 (Action<IUnitTestTransaction>)(tx =>
                 {
                     foreach (var result in results)
                     {
-                        var outerElement = TestElementCreator(result, tx, elements);
+                        var outerElement = TestElementCreator(result, tx, elements, id);
                         if (outerElement != null)
                         {
                             tx.Create(outerElement);
