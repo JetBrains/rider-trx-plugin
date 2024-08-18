@@ -23,6 +23,7 @@ using JetBrains.ReSharper.UnitTestFramework.Elements;
 using JetBrains.ReSharper.UnitTestFramework.Persistence;
 using JetBrains.ReSharper.UnitTestFramework.Transient;
 using JetBrains.ReSharper.UnitTestFramework.UI.ViewModels;
+using JetBrains.Rider.Model;
 using JetBrains.Util;
 using JetBrains.Util.Dotnet.TargetFrameworkIds;
 using Rider.Plugins.TrxPlugin.TrxNodes;
@@ -33,7 +34,7 @@ namespace Rider.Plugins.TrxPlugin;
 [SolutionComponent]
 public class TrxManager
 {
-    [NotNull] private readonly Lifetime myLifetime;
+    private readonly Lifetime myLifetime;
     [NotNull] private readonly TransientTestProvider myTransientTestProvider;
     [NotNull] private readonly IUnitTestElementRepository myElementRepository;
     [NotNull] private readonly IUnitTestSessionRepository mySessionRepository;
@@ -66,6 +67,17 @@ public class TrxManager
         myModel = solution.GetProtocolSolution().GetRdTrxPluginModel();
         mySolution = solution;
         myModel.ImportTrxCall.SetAsync(HandleCall);
+
+        myLifetime.OnTermination(CloseAllUnitTestSessions);
+    }
+
+    private void CloseAllUnitTestSessions()
+    {
+        var sessions = mySessionConductor.Sessions;
+        foreach (var sessionTreeViewModel in sessions)
+        {
+            mySessionConductor.CloseSession(sessionTreeViewModel.Session);
+        }
     }
 
     public List<UnitTestResult> ParseResults(XElement node)
@@ -171,11 +183,11 @@ public class TrxManager
             return null;
         }
 
-        var existingElement = myElementRepository.GetBy(element.NaturalId);
-        if (existingElement != null)
-        {
-            myElementRepository.Remove(new List<IUnitTestElement> { existingElement });
-        }
+        // var existingElement = myElementRepository.GetBy(element.NaturalId);
+        // if (existingElement != null)
+        // {
+        //     tx.Delete(existingElement);
+        // }
 
         if (current.InnerResults != null)
         {
@@ -225,24 +237,25 @@ public class TrxManager
         }
 
         AddDefinitions(root, results);
-        await DisplayResults((CancellationToken)myLifetime, results, root.Attribute("id")?.Value);
+        await DisplayResults((CancellationToken)myLifetime, results, root.Attribute("id")?.Value, trxFilePath);
         return true;
     }
 
-    private async Task DisplayResults(CancellationToken ct, List<UnitTestResult> results, string id)
+    private async Task DisplayResults(CancellationToken ct, List<UnitTestResult> results, string id, string trxFilePath)
     {
         try
         {
             var existingSession = mySessionRepository.GetById(new Guid(id));
             if (existingSession != null)
             {
-                mySessionRepository.DestroySession(existingSession);
+                await myElementRepository.Remove(existingSession.Elements);
+                await mySessionConductor.CloseSession(existingSession);
             }
 
             IUnitTestSession
-                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance, "Imported", new Guid(id));
-
-            HashSet<IUnitTestElement> elements = new HashSet<IUnitTestElement>();
+                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance,
+                    Path.GetFileName(trxFilePath), new Guid(id));
+            HashSet<IUnitTestElement> elements = [];
             IUnitTestTransactionCommitResult transactionCommitResult = await this.myElementRepository.BeginTransaction(
                 (Action<IUnitTestTransaction>)(tx =>
                 {

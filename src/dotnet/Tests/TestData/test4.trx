@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TestRun id="12345678-1234-1234-1234-123456789012" name="NestedTestRun" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
+<TestRun id="12345678-1234-1234-1234-123456789013" name="NestedTestRun" xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
   <Times creation="2023-10-01T12:00:00.000Z" queuing="2023-10-01T12:00:00.000Z" start="2023-10-01T12:00:00.000Z" finish="2023-10-01T12:00:00.000Z" />
   <TestSettings name="TestSettings1" id="2" />
   <Results>
-    <UnitTestResult executionId="1" testId="1" testName="MainTest" computerName="TestComputer" duration="0.00:01:00" startTime="2023-10-01T12:00:00.000Z" endTime="2023-10-01T12:01:00.000Z" outcome="Failed">
+    <UnitTestResult executionId="1" testId="1" testName="MainTest" computerName="TestComputer" duration="0.00:01:00" startTime="2023-10-01T12:00:00.000Z" endTime="2023-10-01T12:01:00.000Z" outcome="Passed">
       <Output>
         <StdOut>Main test output</StdOut>
         <StdErr>Main test error</StdErr>
@@ -18,7 +18,7 @@
             <StdOut>SubTest1 output</StdOut>
           </Output>
           <InnerResults>
-            <UnitTestResult executionId="3" testId="3" testName="SubSubTest1" computerName="TestComputer" duration="0.00:00:15" startTime="2023-10-01T12:00:00.000Z" endTime="2023-10-01T12:00:15.000Z" outcome="Passed">
+            <UnitTestResult executionId="3" testId="3" testName="SubSubTest1" computerName="TestComputer" duration="0.00:00:15" startTime="2023-10-01T12:00:00.000Z" endTime="2023-10-01T12:00:15.000Z" outcome="Failed">
               <Output>
                 <StdOut>SubSubTest1 output</StdOut>
               </Output>
