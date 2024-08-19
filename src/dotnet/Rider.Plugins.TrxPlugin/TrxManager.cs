@@ -69,6 +69,13 @@ public class TrxManager
         myModel.ImportTrxCall.SetAsync(HandleCall);
 
         myLifetime.OnTermination(CloseAllUnitTestSessions);
+        mySessionConductor.SessionClosed.Advise(myLifetime, OnSessionClosed);
+    }
+
+    private async void OnSessionClosed(IUnitTestSessionTreeViewModel sessionTreeViewModel)
+    {
+        var session = sessionTreeViewModel.Session;
+        _ = myElementRepository.Remove(session.Elements);
     }
 
     private void CloseAllUnitTestSessions()
@@ -78,6 +85,7 @@ public class TrxManager
         {
             mySessionConductor.CloseSession(sessionTreeViewModel.Session);
         }
+        myElementRepository.Clear();
     }
 
     public List<UnitTestResult> ParseResults(XElement node)
@@ -183,12 +191,6 @@ public class TrxManager
             return null;
         }
 
-        // var existingElement = myElementRepository.GetBy(element.NaturalId);
-        // if (existingElement != null)
-        // {
-        //     tx.Delete(existingElement);
-        // }
-
         if (current.InnerResults != null)
         {
             foreach (var child in current.InnerResults.UnitTestResults)
@@ -248,8 +250,7 @@ public class TrxManager
             var existingSession = mySessionRepository.GetById(new Guid(id));
             if (existingSession != null)
             {
-                await myElementRepository.Remove(existingSession.Elements);
-                await mySessionConductor.CloseSession(existingSession);
+                _ = mySessionConductor.CloseSession(existingSession);
             }
 
             IUnitTestSession
