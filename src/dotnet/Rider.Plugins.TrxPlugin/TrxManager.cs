@@ -16,76 +16,71 @@ using JetBrains.ReSharper.UnitTestFramework.Session;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
 using System.Xml.Serialization;
 using JetBrains.Annotations;
+using JetBrains.Application.Components;
+using JetBrains.Application.Parts;
 using JetBrains.ReSharper.UnitTestFramework;
 using JetBrains.ReSharper.UnitTestFramework.Caching;
 using JetBrains.ReSharper.UnitTestFramework.Criteria;
 using JetBrains.ReSharper.UnitTestFramework.Elements;
 using JetBrains.ReSharper.UnitTestFramework.Persistence;
-using JetBrains.ReSharper.UnitTestFramework.Transient;
 using JetBrains.ReSharper.UnitTestFramework.UI.ViewModels;
-using JetBrains.Rider.Model;
 using JetBrains.Util;
 using JetBrains.Util.Dotnet.TargetFrameworkIds;
+using JetBrains.Util.Logging;
+using Rider.Plugins.TrxPlugin.TransientTestSessions;
 using Rider.Plugins.TrxPlugin.TrxNodes;
 using UnitTestResult = Rider.Plugins.TrxPlugin.TrxNodes.UnitTestResult;
 
 namespace Rider.Plugins.TrxPlugin;
 
-[SolutionComponent]
+[SolutionComponent(Instantiation.ContainerAsyncPrimaryThread)]
 public class TrxManager
 {
-    private readonly Lifetime myLifetime;
-    [NotNull] private readonly TransientTestProvider myTransientTestProvider;
-    [NotNull] private readonly IUnitTestElementRepository myElementRepository;
-    [NotNull] private readonly IUnitTestSessionRepository mySessionRepository;
-    [NotNull] private readonly IUnitTestSessionConductor mySessionConductor;
-    [NotNull] private readonly IUnitTestingProjectCache myProjectCache;
-    [NotNull] private readonly ILogger myLogger;
-    [NotNull] private readonly IUnitTestResultManager myResultManager;
-    [NotNull] private readonly RdTrxPluginModel myModel;
-    [NotNull] private readonly ISolution mySolution;
+    private readonly Lifetime _myLifetime;
+    [NotNull] private readonly TestProvider _myTestProvider;
+    [NotNull] private readonly IUnitTestElementRepository _myElementRepository;
+    [NotNull] private readonly IUnitTestSessionRepository _mySessionRepository;
+    [NotNull] private readonly IUnitTestSessionConductor _mySessionConductor;
+    [NotNull] private readonly IUnitTestingProjectCache _myProjectCache;
+    [NotNull] private readonly ILogger _myLogger;
+    [NotNull] private readonly IUnitTestResultManager _myResultManager;
+    [NotNull] private readonly ISolution _mySolution;
 
     public TrxManager(
         Lifetime lifetime,
-        TransientTestProvider transientTestProvider,
-        IUnitTestElementRepository elementRepository,
-        IUnitTestSessionRepository repository,
-        IUnitTestSessionConductor sessionConductor,
-        IUnitTestResultManager resultManager,
-        IUnitTestingProjectCache projectCache,
-        ILogger logger,
-        ISolution solution)
+        IComponentContainer componentContainer
+        )
     {
-        myLifetime = lifetime;
-        myTransientTestProvider = transientTestProvider;
-        myElementRepository = elementRepository;
-        mySessionRepository = repository;
-        mySessionConductor = sessionConductor;
-        myResultManager = resultManager;
-        myProjectCache = projectCache;
-        myLogger = logger;
-        myModel = solution.GetProtocolSolution().GetRdTrxPluginModel();
-        mySolution = solution;
-        myModel.ImportTrxCall.SetAsync(HandleCall);
+        _myLifetime = lifetime;
+        _myTestProvider = new TestProvider();
+        _myElementRepository = componentContainer?.GetComponent<IUnitTestElementRepository>();
+        _mySessionRepository = componentContainer?.GetComponent<IUnitTestSessionRepository>();
+        _mySessionConductor = componentContainer?.GetComponent<IUnitTestSessionConductor>();
+        _myResultManager = componentContainer?.GetComponent<IUnitTestResultManager>();
+        _myProjectCache = componentContainer?.GetComponent<IUnitTestingProjectCache>();
+        _myLogger = componentContainer?.GetComponent<ILogger>() ?? Logger.GetLogger<TrxManager>();
+        _mySolution = componentContainer?.GetComponent<ISolution>();
+        var myModel = _mySolution?.GetProtocolSolution().GetRdTrxPluginModel();
+        myModel?.ImportTrxCall.SetAsync(HandleCall);
 
-        myLifetime.OnTermination(CloseAllUnitTestSessions);
-        mySessionConductor.SessionClosed.Advise(myLifetime, OnSessionClosed);
+        _myLifetime.OnTermination(CloseAllUnitTestSessions);
+        _mySessionConductor?.SessionClosed.Advise(_myLifetime, OnSessionClosed);
     }
 
-    private async void OnSessionClosed(IUnitTestSessionTreeViewModel sessionTreeViewModel)
+    private void OnSessionClosed(IUnitTestSessionTreeViewModel sessionTreeViewModel)
     {
         var session = sessionTreeViewModel.Session;
-        _ = myElementRepository.Remove(session.Elements);
+        _ = _myElementRepository.Remove(session.Elements);
     }
 
     private void CloseAllUnitTestSessions()
     {
-        var sessions = mySessionConductor.Sessions;
+        var sessions = _mySessionConductor.Sessions;
         foreach (var sessionTreeViewModel in sessions)
         {
-            mySessionConductor.CloseSession(sessionTreeViewModel.Session);
+            _mySessionConductor.CloseSession(sessionTreeViewModel.Session);
         }
-        myElementRepository.Clear();
+        _myElementRepository.Clear();
     }
 
     public List<UnitTestResult> ParseResults(XElement node)
@@ -113,7 +108,7 @@ public class TrxManager
                 }
                 catch (Exception ex)
                 {
-                    myLogger.Error(ex);
+                    _myLogger.Error(ex);
                 }
             }
             else
@@ -150,7 +145,7 @@ public class TrxManager
                 }
                 catch (Exception ex)
                 {
-                    myLogger.Error(ex);
+                    _myLogger.Error(ex);
                 }
             }
             else
@@ -179,11 +174,11 @@ public class TrxManager
     {
         UnitTestElementNamespace ns =
             UnitTestElementNamespace.Create(current.Definition.TestMethod.ClassName);
-        TransientTestElement element = new TransientTestElement(current.TestName, ns)
+        TestElement element = new TestElement(current.TestName, ns)
         {
-            NaturalId = UT.CreateId(myProjectCache.GetProject(mySolution.SolutionDirectory.ToString()),
+            NaturalId = UT.CreateId(_myProjectCache.GetProject(_mySolution.SolutionDirectory.ToString()),
                 TargetFrameworkId.Default,
-                (IUnitTestProvider)this.myTransientTestProvider,
+                this._myTestProvider,
                 testRunId + current.Definition.TestMethod.ClassName + current.TestName)
         };
         if (elements.Contains(element))
@@ -198,9 +193,9 @@ public class TrxManager
                 var childElement = TestElementCreator(child, tx, elements, testRunId);
                 if (childElement != null)
                 {
-                    childElement.Parent = (IUnitTestElement)element;
-                    tx.Create((IUnitTestElement)childElement);
-                    elements.Add((IUnitTestElement)childElement);
+                    childElement.Parent = element;
+                    tx.Create(childElement);
+                    elements.Add(childElement);
                 }
             }
         }
@@ -221,7 +216,7 @@ public class TrxManager
         }
         catch (Exception ex)
         {
-            myLogger.Error(ex);
+            _myLogger.Error(ex);
             return false;
         }
 
@@ -239,7 +234,7 @@ public class TrxManager
         }
 
         AddDefinitions(root, results);
-        await DisplayResults((CancellationToken)myLifetime, results, root.Attribute("id")?.Value, trxFilePath);
+        await DisplayResults(_myLifetime, results, root.Attribute("id")?.Value, trxFilePath);
         return true;
     }
 
@@ -247,18 +242,18 @@ public class TrxManager
     {
         try
         {
-            var existingSession = mySessionRepository.GetById(new Guid(id));
+            var existingSession = _mySessionRepository.GetById(new Guid(id));
             if (existingSession != null)
             {
-                _ = mySessionConductor.CloseSession(existingSession);
+                _ = _mySessionConductor.CloseSession(existingSession);
             }
 
             IUnitTestSession
-                session = this.mySessionRepository.CreateSession(NothingCriterion.Instance,
+                session = this._mySessionRepository.CreateSession(NothingCriterion.Instance,
                     Path.GetFileName(trxFilePath), new Guid(id));
             HashSet<IUnitTestElement> elements = [];
-            IUnitTestTransactionCommitResult transactionCommitResult = await this.myElementRepository.BeginTransaction(
-                (Action<IUnitTestTransaction>)(tx =>
+            IUnitTestTransactionCommitResult transactionCommitResult = await this._myElementRepository.BeginTransaction(
+                (tx =>
                 {
                     foreach (var result in results)
                     {
@@ -271,7 +266,7 @@ public class TrxManager
                     }
                 }), ct);
             UT.Facade.Append(
-                    (IUnitTestElementCriterion)new TestElementCriterion((IEnumerable<IUnitTestElement>)elements)).To
+                    new TestElementCriterion(elements)).To
                 .Session(session);
             foreach (var element in elements)
             {
@@ -289,11 +284,11 @@ public class TrxManager
                     case null:
                         break;
                     case "passed":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Success, null,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Success, null,
                             TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
                         break;
                     case "failed":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Failed,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Failed,
                             result.Output?.ErrorInfo?.Message,
                             TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
                         var exceptions = new List<TestException>
@@ -301,46 +296,45 @@ public class TrxManager
                             new TestException(null, result.Output?.ErrorInfo?.Message,
                                 result.Output?.ErrorInfo?.StackTrace)
                         };
-                        myResultManager.TestException(element, session, exceptions);
+                        _myResultManager.TestException(element, session, exceptions);
                         break;
                     case "aborted":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Aborted,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Aborted,
                             null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
                         break;
                     case "running":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Running,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Running,
                             null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
                         break;
                     case "inconclusive":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Inconclusive, null,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Inconclusive, null,
                             TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
                         break;
                     case "pending":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Pending,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Pending,
                             null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
                         break;
                     case "notexecuted":
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Ignored,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Ignored,
                             result.Output?.ErrorInfo?.Message);
                         break;
                     default:
-                        myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
+                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
                             null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
                         break;
                 }
 
-                myResultManager.TestOutput(element, session, result.Output?.StdOut, TestOutputType.STDOUT);
+                _myResultManager.TestOutput(element, session, result.Output?.StdOut, TestOutputType.STDOUT);
             }
 
-            IUnitTestSessionTreeViewModel sessionTreeViewModel = await this.mySessionConductor.OpenSession(session);
+            IUnitTestSessionTreeViewModel sessionTreeViewModel = await this._mySessionConductor.OpenSession(session);
             sessionTreeViewModel.Grouping.Value = new UnitTestingGroupingSelection(UnitTestSessionTreeGroupings
-                .GetSessionProviders(mySolution, session)
+                .GetSessionProviders(_mySolution, session)
                 .Where(p => p.Key == "Namespace").ToArray());
-            session = (IUnitTestSession)null;
         }
         catch (Exception ex)
         {
-            this.myLogger.Error(ex);
+            this._myLogger.Error(ex);
         }
     }
 

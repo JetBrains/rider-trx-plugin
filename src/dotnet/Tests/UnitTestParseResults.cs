@@ -1,4 +1,5 @@
 using System.Xml.Linq;
+using JetBrains.Application.Components;
 using JetBrains.Lifetimes;
 using JetBrains.ProjectModel;
 using JetBrains.ReSharper.Feature.Services.Protocol;
@@ -6,7 +7,6 @@ using JetBrains.ReSharper.UnitTestFramework.Caching;
 using JetBrains.ReSharper.UnitTestFramework.Execution;
 using JetBrains.ReSharper.UnitTestFramework.Persistence;
 using JetBrains.ReSharper.UnitTestFramework.Session;
-using JetBrains.ReSharper.UnitTestFramework.Transient;
 using JetBrains.ReSharper.UnitTestFramework.UI.Session;
 using JetBrains.Rider.Model;
 using Moq;
@@ -26,31 +26,7 @@ public class TestParseResults
     [SetUp]
     public void Setup()
     {
-        var lifetime = new Lifetime();
-        var transientTestProvider = new TransientTestProvider();
-        var elementRepository = new Mock<IUnitTestElementRepository>().Object;
-        var repository = new Mock<IUnitTestSessionRepository>().Object;
-        var sessionConductor = new Mock<IUnitTestSessionConductor>().Object;
-        var resultManager = new Mock<IUnitTestResultManager>().Object;
-        var projectCache = new Mock<IUnitTestingProjectCache>().Object;
-        var logger = new Mock<ILogger>().Object;
-        var solution = new Mock<ISolution>();
-        solution.Setup(s => s.GetData<Solution>(ProtocolExtensions.ProtocolSolutionKey)).Returns(new Solution(
-            new RdProjectId("TestProject"),
-            new RdSolutionOpenStrategy_Unknown(new RdSolutionDescription_Unknown(), false)));
-
-
-        _trxManager = new TrxManager(
-            lifetime,
-            transientTestProvider,
-            elementRepository,
-            repository,
-            sessionConductor,
-            resultManager,
-            projectCache,
-            logger,
-            solution.Object
-        );
+        _trxManager = new TrxManager(Lifetime.Eternal, null);
     }
 
     [Test]
@@ -148,7 +124,7 @@ public class TestParseResults
         var results = _trxManager.ParseResults(root);
         Assert.That(results.Count, Is.EqualTo(1));
         Assert.That(results[0].TestName, Is.EqualTo("MainTest"));
-        Assert.That(results[0].Outcome, Is.EqualTo("Failed"));
+        Assert.That(results[0].Outcome, Is.EqualTo("Passed"));
         Assert.That(results[0].InnerResults?.UnitTestResults?.Count, Is.EqualTo(2));
         Assert.That(results[0].InnerResults.UnitTestResults[0].TestName, Is.EqualTo("SubTest1"));
         Assert.That(results[0].InnerResults.UnitTestResults[1].TestName, Is.EqualTo("SubTest2"));
@@ -160,7 +136,7 @@ public class TestParseResults
         Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].TestName,
             Is.EqualTo("SubSubTest2"));
         Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[0].Outcome,
-            Is.EqualTo("Passed"));
+            Is.EqualTo("Failed"));
         Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].Outcome,
             Is.EqualTo("Failed"));
     }

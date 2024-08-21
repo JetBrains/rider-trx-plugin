@@ -10,18 +10,31 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.0"/>
+        <PackageReference Include="coverlet.collector" Version="6.0.0" />
         <PackageReference Include="JetBrains.Lifetimes" Version="2024.1.0" />
-        <PackageReference Include="JetBrains.Psi.Features.UnitTesting" Version="243.0.20240726.160833-eap01d" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0"/>
+        <PackageReference Include="JetBrains.NuGet.Frameworks" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.PackageManagement" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Packaging" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Resolver" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Versioning" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Commands" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Common" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Configurations" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Credentials" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.DependencyResolver.Core" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.LibraryModel" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.ProjectModel" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.NuGet.Protocol" Version="6.10.20240726.136" />
+        <PackageReference Include="JetBrains.Psi.Features.UnitTesting" Version="243.0.20240821.51641-eap01d" />
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
         <PackageReference Include="Moq" Version="4.20.70" />
-        <PackageReference Include="NUnit" Version="4.1.0"/>
-        <PackageReference Include="NUnit.Analyzers" Version="3.9.0"/>
-        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0"/>
+        <PackageReference Include="NUnit" Version="4.1.0" />
+        <PackageReference Include="NUnit.Analyzers" Version="3.9.0" />
+        <PackageReference Include="NUnit3TestAdapter" Version="4.5.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <Using Include="NUnit.Framework"/>
+        <Using Include="NUnit.Framework" />
     </ItemGroup>
 
     <ItemGroup>

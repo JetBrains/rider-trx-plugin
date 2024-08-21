@@ -9,7 +9,7 @@ import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
 
-class TrxFileProjectViewAction : AnAction("Import this TRX as unit test session"), CoroutineScope {
+class TrxFileProjectViewAction : AnAction(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
@@ -21,14 +21,5 @@ class TrxFileProjectViewAction : AnAction("Import this TRX as unit test session"
             val trxImportService = project?.getService(TrxImportService::class.java)
             val response = file?.let { trxImportService?.importTrx(it.path) }
         }
-    }
-
-    override fun update(e: AnActionEvent) {
-        val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
-        e.presentation.isEnabledAndVisible = file != null && file.extension.equals("trx", ignoreCase = true)
-    }
-
-    override fun getActionUpdateThread(): ActionUpdateThread {
-        return ActionUpdateThread.EDT
     }
 }
