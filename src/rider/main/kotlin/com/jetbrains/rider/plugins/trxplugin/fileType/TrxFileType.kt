@@ -1,39 +1,27 @@
 package com.jetbrains.rider.plugins.trxplugin.fileType
 
-import com.intellij.openapi.fileTypes.FileType
-import com.intellij.openapi.vfs.VirtualFile
+import com.intellij.openapi.fileTypes.LanguageFileType
 import javax.swing.Icon
 
-class TrxFileType : FileType {
+
+class TrxFileType private constructor() : LanguageFileType(TrxLanguage.INSTANCE) {
     override fun getName(): String {
-        return "TRX"
+        return "Trx"
     }
 
     override fun getDescription(): String {
-        return "TRX file"
+        return "Trx file"
     }
 
     override fun getDefaultExtension(): String {
         return "trx"
     }
 
-    override fun getIcon(): Icon? {
-        return null
-    }
-
-    override fun isBinary(): Boolean {
-        return false
-    }
-
-    override fun isReadOnly(): Boolean {
-        return false
-    }
-
-    override fun getCharset(file: VirtualFile, content: ByteArray): String? {
-        return null
+    override fun getIcon(): Icon {
+        return null!!
     }
 
     companion object {
-        val INSTANCE: FileType = TrxFileType()
+        val INSTANCE: TrxFileType = TrxFileType()
     }
 }

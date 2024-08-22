@@ -1,10 +1,17 @@
 <idea-plugin require-restart="true">
     <applicationListeners>
-        <listener class="com.jetbrains.rider.plugins.trxplugin.handler.TrxFileHandler" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+        <listener class="com.jetbrains.rider.plugins.trxplugin.handler.TrxFileHandler"
+                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
     <extensions defaultExtensionNs="com.intellij">
-        <editorNotificationProvider implementation="com.jetbrains.rider.plugins.trxplugin.banner.TrxFileNotificationProvider"/>
-        <fileTypeFactory implementation="com.jetbrains.rider.plugins.trxplugin.fileType.TrxFileTypeFactory"/>
+        <editorNotificationProvider
+            implementation="com.jetbrains.rider.plugins.trxplugin.banner.TrxFileNotificationProvider"/>
+        <fileType
+            name="Trx"
+            implementationClass="com.jetbrains.rider.plugins.trxplugin.fileType.TrxFileType"
+            fieldName="INSTANCE"
+            language="Trx"
+            extensions="trx"/>
     </extensions>
     <actions>
         <action
