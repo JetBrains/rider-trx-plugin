@@ -1,9 +1,11 @@
+package com.jetbrains.rider.plugins.trxplugin.handler
+
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotifications
 
-class TrxFileDropHandler : FileEditorManagerListener {
+class TrxFileHandler : FileEditorManagerListener {
     override fun fileOpened(source: FileEditorManager, file: VirtualFile) {
         if (file.extension == "trx") {
             val project = source.project

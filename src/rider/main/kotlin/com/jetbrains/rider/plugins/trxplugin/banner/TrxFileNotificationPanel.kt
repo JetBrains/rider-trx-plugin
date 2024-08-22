@@ -1,3 +1,5 @@
+package com.jetbrains.rider.plugins.trxplugin.banner
+
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile

@@ -1,17 +1,6 @@
 using System.Xml.Linq;
-using JetBrains.Application.Components;
 using JetBrains.Lifetimes;
-using JetBrains.ProjectModel;
-using JetBrains.ReSharper.Feature.Services.Protocol;
-using JetBrains.ReSharper.UnitTestFramework.Caching;
-using JetBrains.ReSharper.UnitTestFramework.Execution;
-using JetBrains.ReSharper.UnitTestFramework.Persistence;
-using JetBrains.ReSharper.UnitTestFramework.Session;
-using JetBrains.ReSharper.UnitTestFramework.UI.Session;
-using JetBrains.Rider.Model;
-using Moq;
 using Rider.Plugins.TrxPlugin;
-using ILogger = JetBrains.Util.ILogger;
 
 
 namespace Tests;

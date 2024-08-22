@@ -1,25 +1,40 @@
 <idea-plugin require-restart="true">
     <applicationListeners>
-        <listener class="TrxFileDropHandler" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
+        <listener class="com.jetbrains.rider.plugins.trxplugin.handler.TrxFileHandler" topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
     <extensions defaultExtensionNs="com.intellij">
-        <editorNotificationProvider implementation="TrxFileNotificationProvider"/>
+        <editorNotificationProvider implementation="com.jetbrains.rider.plugins.trxplugin.banner.TrxFileNotificationProvider"/>
+        <fileTypeFactory implementation="com.jetbrains.rider.plugins.trxplugin.fileType.TrxFileTypeFactory"/>
     </extensions>
     <actions>
         <action
-            id="TrxFileProjectViewAction"
-            class="TrxFileProjectViewAction"
+            id="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction"
+            class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction"
             text="Import this TRX as unit test session"
             description="Creating unit test session based on the file">
             <add-to-group group-id="SolutionExplorerPopupMenu" anchor="first"/>
         </action>
     </actions>
     <id>com.jetbrains.rider.plugins.trxplugin</id>
-    <name>RiderTrxPlugin</name>
+    <name>TRX Files Support</name>
     <version>_PLACEHOLDER_</version>
-    <vendor url="https://project-url">Author</vendor>
+    <vendor url="https://github.com/artem3605/TrxPlugin">
+        Artem Abaturov, Nikita Magomedeminov
+    </vendor>
     <depends>com.intellij.modules.rider</depends>
-    <description>
-        Template plugin description should go here.
+    <description><![CDATA[
+    <p>This plugin provides support for TRX test result files in JetBrains Rider, allowing you to import TRX files as unit test sessions directly within the IDE.</p>
+
+    <p><b>Key Features:</b></p>
+    <ul>
+        <li>Import TRX files from the file editor or project view context menu.</li>
+        <li>Create unit test sessions automatically based on the TRX file.</li>
+        <li>View test results in a tree structure for better organization and clarity.</li>
+        <li>Default grouping by namespaces, customizable in the unit test sessions tool window.</li>
+        <li>Display standard output, error information, and error stack traces.</li>
+        <li>Support for displaying test duration.</li>
+    </ul>
+    <br>
+    ]]>
     </description>
 </idea-plugin>

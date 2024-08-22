@@ -34,9 +34,3 @@ To use the TRX Support Plugin, there are 2 options:
    - When you open a TRX file in the editor, a banner will appear at the top of the editor.
    - Click the `Import` button in the banner.
    - This will also create a new unit test session and display the test results.
-
-Documentation
--------------
-- [Contributor Guide][docs.contributing]
-
-[docs.contributing]: CONTRIBUTING.md
