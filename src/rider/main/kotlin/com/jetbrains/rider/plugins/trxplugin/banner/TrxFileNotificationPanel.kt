@@ -2,6 +2,7 @@ package com.jetbrains.rider.plugins.trxplugin.banner
 
 import com.intellij.ui.EditorNotificationPanel
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.EditorNotifications
 import com.jetbrains.rider.plugins.trxplugin.TrxImportService
@@ -22,6 +23,7 @@ class TrxFileNotificationPanel(project: Project, file: VirtualFile) : EditorNoti
                 if (response == "Failed") {
                     file.putUserData(TrxFileNotificationProvider.KEY_IMPORT_FAILED, true)
                     EditorNotifications.getInstance(project).updateNotifications(file)
+                    Messages.showErrorDialog("Failed to import TRX file", "Import TRX")
                 }
             }
         }

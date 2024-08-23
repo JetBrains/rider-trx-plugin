@@ -3,6 +3,7 @@ package com.jetbrains.rider.plugins.trxplugin.action
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
+import com.intellij.openapi.ui.Messages
 import com.jetbrains.rider.plugins.trxplugin.TrxImportService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,6 +22,9 @@ class TrxFileProjectViewAction : AnAction(), CoroutineScope {
         launch {
             val trxImportService = project?.getService(TrxImportService::class.java)
             val response = file?.let { trxImportService?.importTrx(it.path) }
+            if (response == "Failed") {
+                Messages.showErrorDialog("Failed to import TRX file", "Import TRX")
+            }
         }
     }
 }

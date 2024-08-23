@@ -7,6 +7,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
+import org.jetbrains.changelog.date
 
 plugins {
     alias(libs.plugins.changelog)
@@ -47,6 +48,12 @@ val riderSdkPath by lazy {
 
     println("Rider SDK path: $path")
     return@lazy path
+}
+
+changelog{
+    version.set("1.0")
+    header.set(provider { "[${version.get()}] - ${date()}" })
+    headerParserRegex.set("""(\d+\.\d+)""".toRegex())
 }
 
 dependencies {
@@ -91,6 +98,7 @@ sourceSets {
         resources.srcDir("src/rider/main/resources")
     }
 }
+
 
 tasks {
     val generateDotNetSdkProperties by registering {
