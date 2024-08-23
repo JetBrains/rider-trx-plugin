@@ -18,7 +18,7 @@ class TrxFileType private constructor() : LanguageFileType(TrxLanguage.INSTANCE)
     }
 
     override fun getIcon(): Icon {
-        return null!!
+        return TrxIcon.FILE
     }
 
     companion object {

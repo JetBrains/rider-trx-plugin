@@ -14,7 +14,9 @@ class TrxFileNotificationProvider : EditorNotifications.Provider<EditorNotificat
     }
 
     override fun createNotificationPanel(file: VirtualFile, fileEditor: FileEditor, project: Project): EditorNotificationPanel? {
-        return if (file.extension == "trx") {
+        val importFailed = file.getUserData(KEY_IMPORT_FAILED) ?: false
+
+        return if (file.extension == "trx" && !importFailed) {
             TrxFileNotificationPanel(project, file)
         } else {
             null
@@ -23,5 +25,6 @@ class TrxFileNotificationProvider : EditorNotifications.Provider<EditorNotificat
 
     companion object {
         private val KEY = Key.create<EditorNotificationPanel>("trx.file.notification")
+        val KEY_IMPORT_FAILED = Key.create<Boolean>("trx.file.importFailed")
     }
 }

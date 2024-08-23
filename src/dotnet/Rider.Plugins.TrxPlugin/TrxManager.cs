@@ -93,22 +93,15 @@ public class TrxManager
                 var serializer = new XmlSerializer(typeof(UnitTestResult),
                     "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
                 var startNode = new XElement(result);
-                try
+                using (var reader = startNode.CreateReader())
                 {
-                    using (var reader = startNode.CreateReader())
+                    var unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
+                    if (unitTestResult == null)
                     {
-                        var unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
-                        if (unitTestResult == null)
-                        {
-                            continue;
-                        }
-
-                        results.Add(unitTestResult);
+                        continue;
                     }
-                }
-                catch (Exception ex)
-                {
-                    _myLogger.Error(ex);
+
+                    results.Add(unitTestResult);
                 }
             }
             else
@@ -129,23 +122,16 @@ public class TrxManager
                 var serializer = new XmlSerializer(typeof(UnitTest),
                     "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
                 var startNode = new XElement(element);
-                try
+                using (var reader = startNode.CreateReader())
                 {
-                    using (var reader = startNode.CreateReader())
+                    var unitTest = (UnitTest)serializer.Deserialize(reader);
+                    foreach (var result in results)
                     {
-                        var unitTest = (UnitTest)serializer.Deserialize(reader);
-                        foreach (var result in results)
+                        if (result.Id == unitTest?.Execution.Id)
                         {
-                            if (result.Id == unitTest?.Execution.Id)
-                            {
-                                result.Definition = unitTest;
-                            }
+                            result.Definition = unitTest;
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    _myLogger.Error(ex);
                 }
             }
             else
@@ -213,35 +199,29 @@ public class TrxManager
             {
                 document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
             }
+            var root = document.Root;
+            var results = ParseResults(root);
+            var countOuterResults = results.Count;
+            for (int i = 0; i < countOuterResults; i++)
+            {
+                AddInnerResults(results[i], results);
+            }
+
+            AddDefinitions(root, results);
+            await DisplayResults(_myLifetime, results, root?.Attribute("id")?.Value, trxFilePath);
         }
         catch (Exception ex)
         {
             _myLogger.Error(ex);
             return false;
         }
-
-        var root = document.Root;
-        if (root == null)
-        {
-            return false;
-        }
-
-        var results = ParseResults(root);
-        var countOuterResults = results.Count;
-        for (int i = 0; i < countOuterResults; i++)
-        {
-            AddInnerResults(results[i], results);
-        }
-
-        AddDefinitions(root, results);
-        await DisplayResults(_myLifetime, results, root.Attribute("id")?.Value, trxFilePath);
         return true;
     }
 
     private async Task DisplayResults(CancellationToken ct, List<UnitTestResult> results, string id, string trxFilePath)
     {
-        try
-        {
+        // try
+        // {
             var existingSession = _mySessionRepository.GetById(new Guid(id));
             if (existingSession != null)
             {
@@ -331,11 +311,11 @@ public class TrxManager
             sessionTreeViewModel.Grouping.Value = new UnitTestingGroupingSelection(UnitTestSessionTreeGroupings
                 .GetSessionProviders(_mySolution, session)
                 .Where(p => p.Key == "Namespace").ToArray());
-        }
-        catch (Exception ex)
-        {
-            this._myLogger.Error(ex);
-        }
+        // }
+        // catch (Exception ex)
+        // {
+        //     this._myLogger.Error(ex);
+        // }
     }
 
     private async Task<RdCallResponse> HandleCall(Lifetime lt, RdCallRequest request)
