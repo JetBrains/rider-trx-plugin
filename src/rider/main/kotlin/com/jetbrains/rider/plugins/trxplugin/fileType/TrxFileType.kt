@@ -1,10 +1,11 @@
 package com.jetbrains.rider.plugins.trxplugin.fileType
 
-import com.intellij.openapi.fileTypes.LanguageFileType
+import com.intellij.ide.highlighter.XmlLikeFileType
+import com.intellij.lang.xml.XMLLanguage
 import javax.swing.Icon
 
 
-class TrxFileType private constructor() : LanguageFileType(TrxLanguage.INSTANCE) {
+class TrxFileType private constructor() : XmlLikeFileType(XMLLanguage.INSTANCE) {
     override fun getName(): String {
         return "Trx"
     }

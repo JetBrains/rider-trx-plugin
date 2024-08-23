@@ -49,7 +49,7 @@ public class TrxManager
     public TrxManager(
         Lifetime lifetime,
         IComponentContainer componentContainer
-        )
+    )
     {
         _myLifetime = lifetime;
         _myTestProvider = new TestProvider();
@@ -80,6 +80,7 @@ public class TrxManager
         {
             _mySessionConductor.CloseSession(sessionTreeViewModel.Session);
         }
+
         _myElementRepository.Clear();
     }
 
@@ -199,6 +200,7 @@ public class TrxManager
             {
                 document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
             }
+
             var root = document.Root;
             var results = ParseResults(root);
             var countOuterResults = results.Count;
@@ -215,107 +217,101 @@ public class TrxManager
             _myLogger.Error(ex);
             return false;
         }
+
         return true;
     }
 
     private async Task DisplayResults(CancellationToken ct, List<UnitTestResult> results, string id, string trxFilePath)
     {
-        // try
-        // {
-            var existingSession = _mySessionRepository.GetById(new Guid(id));
-            if (existingSession != null)
-            {
-                _ = _mySessionConductor.CloseSession(existingSession);
-            }
+        var existingSession = _mySessionRepository.GetById(new Guid(id));
+        if (existingSession != null)
+        {
+            _ = _mySessionConductor.CloseSession(existingSession);
+        }
 
-            IUnitTestSession
-                session = this._mySessionRepository.CreateSession(NothingCriterion.Instance,
-                    Path.GetFileName(trxFilePath), new Guid(id));
-            HashSet<IUnitTestElement> elements = [];
-            IUnitTestTransactionCommitResult transactionCommitResult = await this._myElementRepository.BeginTransaction(
-                (tx =>
+        IUnitTestSession
+            session = this._mySessionRepository.CreateSession(NothingCriterion.Instance,
+                Path.GetFileName(trxFilePath), new Guid(id));
+        HashSet<IUnitTestElement> elements = [];
+        IUnitTestTransactionCommitResult transactionCommitResult = await this._myElementRepository.BeginTransaction(
+            (tx =>
+            {
+                foreach (var result in results)
                 {
-                    foreach (var result in results)
+                    var outerElement = TestElementCreator(result, tx, elements, id);
+                    if (outerElement != null)
                     {
-                        var outerElement = TestElementCreator(result, tx, elements, id);
-                        if (outerElement != null)
-                        {
-                            tx.Create(outerElement);
-                            elements.Add(outerElement);
-                        }
+                        tx.Create(outerElement);
+                        elements.Add(outerElement);
                     }
-                }), ct);
-            UT.Facade.Append(
-                    new TestElementCriterion(elements)).To
-                .Session(session);
-            foreach (var element in elements)
+                }
+            }), ct);
+        UT.Facade.Append(
+                new TestElementCriterion(elements)).To
+            .Session(session);
+        foreach (var element in elements)
+        {
+            var result = results.FirstOrDefault(r =>
+                r.Definition.TestMethod.ClassName == element.GetNamespace().ToString() &&
+                r.TestName == element.ShortName);
+
+            if (result == null)
             {
-                var result = results.FirstOrDefault(r =>
-                    r.Definition.TestMethod.ClassName == element.GetNamespace().ToString() &&
-                    r.TestName == element.ShortName);
-
-                if (result == null)
-                {
-                    continue;
-                }
-
-                switch (result.Outcome?.ToLower())
-                {
-                    case null:
-                        break;
-                    case "passed":
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Success, null,
-                            TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
-                        break;
-                    case "failed":
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Failed,
-                            result.Output?.ErrorInfo?.Message,
-                            TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
-                        var exceptions = new List<TestException>
-                        {
-                            new TestException(null, result.Output?.ErrorInfo?.Message,
-                                result.Output?.ErrorInfo?.StackTrace)
-                        };
-                        _myResultManager.TestException(element, session, exceptions);
-                        break;
-                    case "aborted":
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Aborted,
-                            null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
-                        break;
-                    case "running":
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Running,
-                            null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
-                        break;
-                    case "inconclusive":
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Inconclusive, null,
-                            TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
-                        break;
-                    case "pending":
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Pending,
-                            null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
-                        break;
-                    case "notexecuted":
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Ignored,
-                            result.Output?.ErrorInfo?.Message);
-                        break;
-                    default:
-                        _myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
-                            null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
-                        break;
-                }
-
-                _myResultManager.TestOutput(element, session, result.Output?.StdOut, TestOutputType.STDOUT);
+                continue;
             }
 
-            IUnitTestSessionTreeViewModel sessionTreeViewModel = await this._mySessionConductor.OpenSession(session);
-            sessionTreeViewModel.Grouping.Value = new UnitTestingGroupingSelection(UnitTestSessionTreeGroupings
-                .GetSessionProviders(_mySolution, session)
-                .Where(p => p.Key == "Namespace").ToArray());
-        // }
-        // catch (Exception ex)
-        // {
-        //     this._myLogger.Error(ex);
-        // }
+            switch (result.Outcome?.ToLower())
+            {
+                case null:
+                    break;
+                case "passed":
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Success, null,
+                        TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
+                    break;
+                case "failed":
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Failed,
+                        result.Output?.ErrorInfo?.Message,
+                        TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
+                    var exceptions = new List<TestException>
+                    {
+                        new TestException(null, result.Output?.ErrorInfo?.Message,
+                            result.Output?.ErrorInfo?.StackTrace)
+                    };
+                    _myResultManager.TestException(element, session, exceptions);
+                    break;
+                case "aborted":
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Aborted,
+                        null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
+                    break;
+                case "running":
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Running,
+                        null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
+                    break;
+                case "inconclusive":
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Inconclusive, null,
+                        TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
+                    break;
+                case "pending":
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Pending,
+                        null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
+                    break;
+                case "notexecuted":
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Ignored,
+                        result.Output?.ErrorInfo?.Message);
+                    break;
+                default:
+                    _myResultManager.TestFinishing(element, session, UnitTestStatus.Unknown,
+                        null, TimeSpan.Parse(result.Duration ?? "0", CultureInfo.InvariantCulture));
+                    break;
+            }
+
+            _myResultManager.TestOutput(element, session, result.Output?.StdOut, TestOutputType.STDOUT);
+        }
+
+        IUnitTestSessionTreeViewModel sessionTreeViewModel = await this._mySessionConductor.OpenSession(session);
+        sessionTreeViewModel.Grouping.Value = new UnitTestingGroupingSelection(UnitTestSessionTreeGroupings
+            .GetSessionProviders(_mySolution, session)
+            .Where(p => p.Key == "Namespace").ToArray());
     }
 
     private async Task<RdCallResponse> HandleCall(Lifetime lt, RdCallRequest request)

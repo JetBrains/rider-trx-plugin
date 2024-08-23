@@ -10,7 +10,7 @@
             name="Trx"
             implementationClass="com.jetbrains.rider.plugins.trxplugin.fileType.TrxFileType"
             fieldName="INSTANCE"
-            language="Trx"
+            language="XML"
             extensions="trx"/>
     </extensions>
     <actions>
@@ -24,7 +24,7 @@
     </actions>
     <id>com.jetbrains.rider.plugins.trxplugin</id>
     <name>TRX Files Support</name>
-    <version>_PLACEHOLDER_</version>
+    <version>1.0</version>
     <vendor url="https://github.com/artem3605/TrxPlugin">
         Artem Abaturov, Nikita Magomedeminov
     </vendor>
