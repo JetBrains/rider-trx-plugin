@@ -1,7 +1,6 @@
 package com.jetbrains.rider.plugins.trxplugin.action
 
 import com.intellij.AbstractBundle
-import com.intellij.ide.IdeBundle
 import com.intellij.openapi.actionSystem.AnAction
 import com.intellij.openapi.actionSystem.AnActionEvent
 import com.intellij.openapi.actionSystem.CommonDataKeys
@@ -30,8 +29,11 @@ class TrxFileProjectViewAction : AnAction(FrontendStrings.message("import.trx.se
         launch {
             val trxImportService = project?.getService(TrxImportService::class.java)
             val response = file?.let { trxImportService?.importTrx(it.path) }
-            if (response == "Failed") {
-                Messages.showErrorDialog("Failed to import TRX file", "Import TRX")
+            if (response?.result == "Failed") {
+                Messages.showErrorDialog(
+                    FrontendStrings.message(response.message),
+                    FrontendStrings.message("import.message.error.title")
+                )
             }
         }
     }

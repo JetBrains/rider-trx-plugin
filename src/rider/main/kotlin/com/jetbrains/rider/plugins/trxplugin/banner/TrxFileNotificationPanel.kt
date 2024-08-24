@@ -30,12 +30,12 @@ class TrxFileNotificationPanel(project: Project, file: VirtualFile) : EditorNoti
             launch {
                 val trxImportService = project.getService(TrxImportService::class.java)
                 val response = trxImportService.importTrx(file.path)
-                if (response == "Failed") {
+                if (response.result == "Failed") {
                     file.putUserData(TrxFileNotificationProvider.KEY_IMPORT_FAILED, true)
                     EditorNotifications.getInstance(project).updateNotifications(file)
                     Messages.showErrorDialog(
-                        "Failed to import TRX file",
-                        FrontendStrings.message("import.message.title")
+                        FrontendStrings.message(response.message),
+                        FrontendStrings.message("import.message.error.title")
                     )
                 }
             }

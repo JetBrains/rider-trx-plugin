@@ -4,8 +4,10 @@ import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.FileDropEvent
 import com.intellij.openapi.editor.FileDropHandler
 import com.intellij.openapi.fileEditor.FileEditorManager
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.LocalFileSystem
 import com.jetbrains.rider.plugins.trxplugin.TrxImportService
+import com.jetbrains.rider.plugins.trxplugin.action.FrontendStrings
 import kotlinx.coroutines.*
 
 class TrxFileDropHandler : FileDropHandler {
@@ -17,6 +19,12 @@ class TrxFileDropHandler : FileDropHandler {
                 ApplicationManager.getApplication().invokeAndWait {
                     CoroutineScope(Dispatchers.Main).launch {
                         val response = trxImportService.importTrx(file.path)
+                        if (response.result == "Failed") {
+                            Messages.showErrorDialog(
+                                FrontendStrings.message(response.message),
+                                FrontendStrings.message("import.message.error.title")
+                            )
+                        }
                     }
                 }
                 continue

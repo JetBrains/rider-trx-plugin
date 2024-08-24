@@ -131,7 +131,7 @@ public class TrxManager
                     var unitTest = (UnitTest)serializer.Deserialize(reader);
                     foreach (var result in results)
                     {
-                        if (result.Id == unitTest?.Execution.Id)
+                        if (result.TestId == unitTest?.Id)
                         {
                             result.Definition = unitTest;
                         }
@@ -162,14 +162,15 @@ public class TrxManager
     private IUnitTestElement TestElementCreator(UnitTestResult current, IUnitTestTransaction tx,
         HashSet<IUnitTestElement> elements, string testRunId)
     {
-        UnitTestElementNamespace ns =
-            UnitTestElementNamespace.Create(current.Definition.TestMethod.ClassName);
+        UnitTestElementNamespace ns = current.Definition?.TestMethod?.ClassName == null
+            ? UnitTestElementNamespace.Create("")
+            : UnitTestElementNamespace.Create(current.Definition.TestMethod.ClassName);
         TestElement element = new TestElement(current.TestName, ns)
         {
             NaturalId = UT.CreateId(_myProjectCache.GetProject(_mySolution.SolutionDirectory.ToString()),
                 TargetFrameworkId.Default,
                 this._myTestProvider,
-                testRunId + current.Definition.TestMethod.ClassName + current.TestName)
+                testRunId + ns.Name + current.TestName)
         };
         if (elements.Contains(element))
         {
@@ -194,34 +195,69 @@ public class TrxManager
     }
 
 
-    private async Task<bool> HandleTrx(string trxFilePath)
+    private async Task<RdCallResponse> HandleTrx(string trxFilePath)
     {
+        XDocument document;
         try
         {
-            XDocument document;
             await using (var stream = File.OpenRead(trxFilePath))
             {
                 document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
             }
+        }
+        catch (Exception ex)
+        {
+            _myLogger.Error(ex);
+            return new RdCallResponse("Failed", "import.messages.error.open");
+        }
 
-            var root = document.Root;
-            var results = ParseResults(root);
-            var countOuterResults = results.Count;
+        var root = document.Root;
+        List<UnitTestResult> results;
+        try
+        {
+            results = ParseResults(root);
+        }
+        catch (Exception ex)
+        {
+            _myLogger.Error(ex);
+            return new RdCallResponse("Failed", "import.messages.error.parse");
+        }
+
+        var countOuterResults = results.Count;
+        try
+        {
             for (int i = 0; i < countOuterResults; i++)
             {
                 AddInnerResults(results[i], results);
             }
+        }
+        catch (Exception ex)
+        {
+            _myLogger.Error(ex);
+            return new RdCallResponse("Failed", "import.messages.error.innerResults");
+        }
 
+        try
+        {
             AddDefinitions(root, results);
+        }
+        catch (Exception ex)
+        {
+            _myLogger.Error(ex);
+            return new RdCallResponse("Failed", "import.messages.error.definitions");
+        }
+
+        try
+        {
             await DisplayResults(_myLifetime, results, root?.Attribute("id")?.Value, trxFilePath);
         }
         catch (Exception ex)
         {
             _myLogger.Error(ex);
-            return false;
+            return new RdCallResponse("Failed", "import.messages.error.displayResults");
         }
 
-        return true;
+        return new RdCallResponse("Success", "Successfully parsed trx file");
     }
 
     private async Task DisplayResults(CancellationToken ct, List<UnitTestResult> results, string id, string trxFilePath)
@@ -229,7 +265,7 @@ public class TrxManager
         var existingSession = _mySessionRepository.GetById(new Guid(id));
         if (existingSession != null)
         {
-            _ = _mySessionConductor.CloseSession(existingSession);
+            await _mySessionConductor.CloseSession(existingSession);
         }
 
         IUnitTestSession
@@ -255,7 +291,7 @@ public class TrxManager
         foreach (var element in elements)
         {
             var result = results.FirstOrDefault(r =>
-                r.Definition.TestMethod.ClassName == element.GetNamespace().ToString() &&
+                (r.Definition?.TestMethod?.ClassName ?? "") == element.GetNamespace().ToString() &&
                 r.TestName == element.ShortName);
 
             if (result == null)
@@ -320,11 +356,6 @@ public class TrxManager
     private async Task<RdCallResponse> HandleCall(Lifetime lt, RdCallRequest request)
     {
         string path = request.TrxPath;
-        if (await HandleTrx(path))
-        {
-            return lt.Execute(() => new RdCallResponse("Success"));
-        }
-
-        return lt.Execute(() => new RdCallResponse("Failed"));
+        return await lt.Execute(() => HandleTrx(path));
     }
 }
