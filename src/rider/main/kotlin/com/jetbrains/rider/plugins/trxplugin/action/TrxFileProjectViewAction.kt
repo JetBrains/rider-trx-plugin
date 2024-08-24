@@ -37,4 +37,9 @@ class TrxFileProjectViewAction : AnAction(FrontendStrings.message("import.trx.se
             }
         }
     }
+
+    override fun update(e: AnActionEvent) {
+        val file = e.getData(CommonDataKeys.VIRTUAL_FILE)
+        e.presentation.isEnabledAndVisible = file != null && file.extension.equals("trx", ignoreCase = true)
+    }
 }

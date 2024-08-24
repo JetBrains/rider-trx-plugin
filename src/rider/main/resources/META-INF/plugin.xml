@@ -1,8 +1,4 @@
 <idea-plugin require-restart="true">
-    <applicationListeners>
-        <listener class="com.jetbrains.rider.plugins.trxplugin.handlers.TrxFileHandler"
-                  topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
-    </applicationListeners>
     <extensions defaultExtensionNs="com.intellij">
         <editorNotificationProvider
             implementation="com.jetbrains.rider.plugins.trxplugin.banner.TrxFileNotificationProvider"/>
