@@ -1,6 +1,6 @@
 <idea-plugin require-restart="true">
     <applicationListeners>
-        <listener class="com.jetbrains.rider.plugins.trxplugin.handler.TrxFileHandler"
+        <listener class="com.jetbrains.rider.plugins.trxplugin.handlers.TrxFileHandler"
                   topic="com.intellij.openapi.fileEditor.FileEditorManagerListener"/>
     </applicationListeners>
     <extensions defaultExtensionNs="com.intellij">
@@ -12,12 +12,13 @@
             fieldName="INSTANCE"
             language="XML"
             extensions="trx"/>
+        <fileDropHandler
+            implementation="com.jetbrains.rider.plugins.trxplugin.handlers.TrxFileDropHandler"/>
     </extensions>
     <actions>
         <action
             id="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction"
             class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction"
-            text="Import this TRX as unit test session"
             description="Creating unit test session based on the file">
             <add-to-group group-id="SolutionExplorerPopupMenu" anchor="first"/>
         </action>

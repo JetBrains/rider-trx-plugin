@@ -1,4 +1,4 @@
-package com.jetbrains.rider.plugins.trxplugin.handler
+package com.jetbrains.rider.plugins.trxplugin.handlers
 
 import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileEditor.FileEditorManagerListener

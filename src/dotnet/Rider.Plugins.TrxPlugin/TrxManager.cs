@@ -70,7 +70,10 @@ public class TrxManager
     private void OnSessionClosed(IUnitTestSessionTreeViewModel sessionTreeViewModel)
     {
         var session = sessionTreeViewModel.Session;
-        _ = _myElementRepository.Remove(session.Elements);
+        if (session.Name.Value.Contains(".trx"))
+        {
+            _ = _myElementRepository.Remove(session.Elements);
+        }
     }
 
     private void CloseAllUnitTestSessions()
@@ -193,9 +196,9 @@ public class TrxManager
 
     private async Task<bool> HandleTrx(string trxFilePath)
     {
-        XDocument document;
         try
         {
+            XDocument document;
             await using (var stream = File.OpenRead(trxFilePath))
             {
                 document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
