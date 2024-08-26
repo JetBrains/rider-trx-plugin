@@ -25,7 +25,6 @@ using JetBrains.ReSharper.UnitTestFramework.Persistence;
 using JetBrains.ReSharper.UnitTestFramework.UI.ViewModels;
 using JetBrains.Util;
 using JetBrains.Util.Dotnet.TargetFrameworkIds;
-using JetBrains.Util.Logging;
 using Rider.Plugins.TrxPlugin.TransientTestSessions;
 using UnitTestResult = Rider.Plugins.TrxPlugin.TrxNodes.UnitTestResult;
 
@@ -51,13 +50,13 @@ public class TrxManager
     {
         _myLifetime = lifetime;
         _myTestProvider = new TestProvider();
-        _myElementRepository = componentContainer?.GetComponent<IUnitTestElementRepository>();
-        _mySessionRepository = componentContainer?.GetComponent<IUnitTestSessionRepository>();
-        _mySessionConductor = componentContainer?.GetComponent<IUnitTestSessionConductor>();
-        _myResultManager = componentContainer?.GetComponent<IUnitTestResultManager>();
-        _myProjectCache = componentContainer?.GetComponent<IUnitTestingProjectCache>();
-        _myLogger = componentContainer?.GetComponent<ILogger>() ?? Logger.GetLogger<TrxManager>();
-        _mySolution = componentContainer?.GetComponent<ISolution>();
+        _myElementRepository = componentContainer.GetComponent<IUnitTestElementRepository>();
+        _mySessionRepository = componentContainer.GetComponent<IUnitTestSessionRepository>();
+        _mySessionConductor = componentContainer.GetComponent<IUnitTestSessionConductor>();
+        _myResultManager = componentContainer.GetComponent<IUnitTestResultManager>();
+        _myProjectCache = componentContainer.GetComponent<IUnitTestingProjectCache>();
+        _myLogger = componentContainer.GetComponent<ILogger>();
+        _mySolution = componentContainer.GetComponent<ISolution>();
         var myModel = _mySolution?.GetProtocolSolution().GetRdTrxPluginModel();
         myModel?.ImportTrxCall.SetAsync(HandleCall);
 

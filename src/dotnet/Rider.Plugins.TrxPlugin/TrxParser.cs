@@ -23,7 +23,7 @@ public static class TrxParser
         {
             if (result.Name.LocalName == "UnitTestResult")
             {
-                UnitTestResult unitTestResult = null;
+                UnitTestResult unitTestResult;
                 if (defaultNamespace.ToString() == "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")
                 {
                     var serializer = new XmlSerializer(typeof(UnitTestResult),
