@@ -47,3 +47,6 @@ To use the TRX Support Plugin, there are 2 options:
    - Choose the TRX file you wish to import.
    - A new unit test session will be created, and the test results will be displayed.
 
+4. **Drag and Drop**:
+   - Drag a TRX file from your file explorer and drop it directly into the editor.
+   - This will create a new unit test session without opening the file.
