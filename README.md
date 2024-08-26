@@ -1,6 +1,12 @@
+<p align="center">
+<img src="https://github.com/artem3605/TrxPlugin/blob/main/src/rider/main/resources/META-INF/pluginIcon.svg" alt="drawing" width="200"/>
+</p>
+
 # TRX Support Plugin for JetBrains Rider
 
 This plugin provides support for TRX test result files in JetBrains Rider. It allows to import TRX files as unit test sessions, making it easier to work with test results directly within the IDE.
+
+![image_2024-08-26_18-19-03](https://github.com/user-attachments/assets/bb7d4ec6-31e3-48ac-9024-fd2a29ad3c61)
 
 ## Features
 
@@ -34,3 +40,13 @@ To use the TRX Support Plugin, there are 2 options:
    - When you open a TRX file in the editor, a banner will appear at the top of the editor.
    - Click the `Import` button in the banner.
    - This will also create a new unit test session and display the test results.
+
+3. **Main Menu Tests Tab**:
+   - Navigate to the Tests tab in the main menu.
+   - Select Import TRX...
+   - Choose the TRX file you wish to import.
+   - A new unit test session will be created, and the test results will be displayed.
+
+4. **Drag and Drop**:
+   - Drag a TRX file from your file explorer and drop it directly into the editor.
+   - This will create a new unit test session without opening the file.

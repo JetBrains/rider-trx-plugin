@@ -7,7 +7,6 @@ namespace Tests;
 
 public class TestParseResults
 {
-    private TrxManager _trxManager;
     private int _passed;
     private int _failed;
     private int _warning;
@@ -15,7 +14,6 @@ public class TestParseResults
     [SetUp]
     public void Setup()
     {
-        _trxManager = new TrxManager(Lifetime.Eternal, null);
     }
 
     [Test]
@@ -29,7 +27,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, root?.GetDefaultNamespace());
+        var results = TrxParser.ParseResults(root, root?.GetDefaultNamespace());
         Assert.That(results.Count, Is.EqualTo(1));
         Assert.That(results[0].TestName, Is.EqualTo("ParentTest"));
         Assert.That(results[0].Outcome, Is.EqualTo("Passed"));
@@ -50,7 +48,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, root?.GetDefaultNamespace());
+        var results = TrxParser.ParseResults(root, root?.GetDefaultNamespace());
         Assert.That(results.Count, Is.EqualTo(20));
         foreach (var result in results)
         {
@@ -86,7 +84,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, root?.GetDefaultNamespace());
+        var results = TrxParser.ParseResults(root, root?.GetDefaultNamespace());
         Assert.That(results.Count, Is.EqualTo(2));
         Assert.That(results[1].TestName, Is.EqualTo("IndependentTest"));
         Assert.That(results[1].Outcome, Is.EqualTo("Passed"));
@@ -110,7 +108,7 @@ public class TestParseResults
 
         var root = document.Root;
 
-        var results = _trxManager.ParseResults(root, root?.GetDefaultNamespace());
+        var results = TrxParser.ParseResults(root, root?.GetDefaultNamespace());
         Assert.That(results.Count, Is.EqualTo(1));
         Assert.That(results[0].TestName, Is.EqualTo("MainTest"));
         Assert.That(results[0].Outcome, Is.EqualTo("Passed"));
@@ -128,5 +126,21 @@ public class TestParseResults
             Is.EqualTo("Failed"));
         Assert.That(results[0].InnerResults.UnitTestResults[0].InnerResults.UnitTestResults[1].Outcome,
             Is.EqualTo("Failed"));
+    }
+
+    [Test]
+    public void Test5()
+    {
+        XDocument document;
+        using (var stream = File.OpenRead("../../../TestData/test5.trx"))
+        {
+            document = XDocument.Load(stream);
+        }
+        var root = document.Root;
+
+        var results = TrxParser.ParseResults(root, root?.GetDefaultNamespace());
+        Assert.That(results.Count, Is.EqualTo(1));
+        Assert.That(results[0].TestName, Is.EqualTo("TestMethod1"));
+        Assert.That(results[0].Outcome, Is.EqualTo("Failed"));
     }
 }
