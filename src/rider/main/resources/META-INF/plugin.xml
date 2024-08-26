@@ -18,6 +18,11 @@
             description="Creating unit test session based on the file">
             <add-to-group group-id="SolutionExplorerPopupMenu" anchor="first"/>
         </action>
+        <action id="com.jetbrains.rider.plugins.trxplugin.action.TrxFileOpenAction"
+                class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileOpenAction" text="Import TRX...">
+            <add-to-group group-id="Rider.UnitTesting.Main" anchor="before"
+                          relative-to-action="RiderUnitTestAppendTestsAction"/>
+        </action>
     </actions>
     <id>com.jetbrains.rider.plugins.trxplugin</id>
     <name>TRX Files Support</name>
