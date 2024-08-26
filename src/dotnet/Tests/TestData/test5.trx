@@ -1,0 +1,69 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tests>
+    <TestRun type="Microsoft.VisualStudio.TestTools.Common.TestRun">
+        <id type="System.Guid">dd2222211-1bfd-4a73-ab57-3743fb1cac11</id>
+        <tests type="System.Collections.Hashtable">
+            <key type="Microsoft.VisualStudio.TestTools.Common.TestId">
+                <id type="System.Guid">9f83fd64-76ec-9cfd-d033-2426bb82b2d6</id>
+            </key>
+            <value type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestElement, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+                <testMethod type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.TestMethod, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+                    <className type="System.String">Class.Name</className>
+                    <name type="System.String">TestMethod1</name>
+                    <expectedExceptionMessage type="System.String" />
+                    <isValid type="System.Boolean">False</isValid>
+                </testMethod>
+                <id type="Microsoft.VisualStudio.TestTools.Common.TestId">
+                    <id type="System.Guid">9f83fd64-76ec-9cfd-d033-2426bb82b2d6</id>
+                </id>
+                <executionId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+                    <id type="System.Guid">071435d0-afd1-4e03-8f99-685b50305deb</id>
+                </executionId>
+                <parentExecutId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+                    <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+                </parentExecutId>
+            </value>
+        </tests>
+
+        <UnitTestResult type="Microsoft.VisualStudio.TestTools.TestTypes.Unit.UnitTestResult, Microsoft.VisualStudio.QualityTools.Tips.UnitTest.ObjectModel, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+            <outcome type="Microsoft.VisualStudio.TestTools.Common.TestOutcome">
+                <value__ type="System.Int32">1</value__>
+            </outcome>
+            <errorInfo type="Microsoft.VisualStudio.TestTools.Common.TestResultErrorInfo">
+                <message type="System.String">Assert.Fail failed. Test failed</message>
+                <stackTrace type="System.String">
+                    at trx2html.Test.AllFailed.TestMethod2() in d:\rido\RidoCode\TRX2HTML Solution\trx2html.Test\AllFailed.cs:line 51
+                </stackTrace>
+            </errorInfo>
+            <traceInfo type="Microsoft.VisualStudio.TestTools.Common.TestExecutionTraceInformation">
+                <trace type="System.Text.StringBuilder">
+                    Creating instance of class trx2html.Test.AllFailed.
+                    Calling Test method trx2html.Test.AllFailed.Microsoft.VisualStudio.TestTools.TestTypes.Unit.TestMethod.
+                </trace>
+            </traceInfo>
+            <stdout type="System.String" />
+
+            <id type="Microsoft.VisualStudio.TestTools.Common.TestResultId">
+                <runId type="System.Guid">bee22211-1bfd-4a73-ab57-3743fb1cac11</runId>
+                <executionId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+                    <id type="System.Guid">071435d0-afd1-4e03-8f99-685b50305deb</id>
+                </executionId>
+                <parentExecId type="Microsoft.VisualStudio.TestTools.Common.TestExecId">
+                    <id type="System.Guid">00000000-0000-0000-0000-000000000000</id>
+                </parentExecId>
+                <testId type="Microsoft.VisualStudio.TestTools.Common.TestId">
+                    <id type="System.Guid">9f83fd64-76ec-9cfd-d033-2426bb82b2d6</id>
+                </testId>
+            </id>
+            <testName type="System.String">TestMethod1</testName>
+            <duration type="System.TimeSpan">00:00:00.0026662</duration>
+            <startTime type="System.DateTime">2024-08-26T19:05:54.9710000Z</startTime>
+            <endTime type="System.DateTime">2024-08-26T19:05:54.9710000Z</endTime>
+            <computerName type="System.String">RIDER-PC</computerName>
+            <testType type="System.String">UnitTest</testType>
+        </UnitTestResult>
+    </TestRun>
+</Tests>
+
+
+
