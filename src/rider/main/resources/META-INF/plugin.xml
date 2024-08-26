@@ -36,7 +36,8 @@
 
     <p><b>Key Features:</b></p>
     <ul>
-        <li>Import TRX files from the file editor, project view context menu, "Tests" tab in the main menu, or by dropping the file in the editor.</li>        <li>Create unit test sessions automatically based on the TRX file.</li>
+        <li>Import TRX files from the file editor, project view context menu, "Tests" tab in the main menu, or by dropping the file in the editor.</li>
+        <li>Create unit test sessions automatically based on the TRX file.</li>
         <li>View test results in a tree structure for better organization and clarity.</li>
         <li>Default grouping by namespaces, customizable in the unit test sessions tool window.</li>
         <li>Display standard output, error information, and error stack traces.</li>
