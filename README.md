@@ -1,6 +1,12 @@
+<p align="center">
+<img src="https://github.com/artem3605/TrxPlugin/blob/main/src/rider/main/resources/META-INF/pluginIcon.svg" alt="drawing" width="200"/>
+</p>
+
 # TRX Support Plugin for JetBrains Rider
 
 This plugin provides support for TRX test result files in JetBrains Rider. It allows to import TRX files as unit test sessions, making it easier to work with test results directly within the IDE.
+
+![image_2024-08-26_18-19-03](https://github.com/user-attachments/assets/bb7d4ec6-31e3-48ac-9024-fd2a29ad3c61)
 
 ## Features
 
