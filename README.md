@@ -29,7 +29,7 @@ After installation, the plugin will be available for use without requiring any a
 
 ## Usage
 
-To use the TRX Support Plugin, there are 2 options:
+To use the TRX Support Plugin, there are 4 options:
 
 1. **Context Menu**:
    - Right-click on a TRX file in the file editor or project view.
@@ -43,7 +43,7 @@ To use the TRX Support Plugin, there are 2 options:
 
 3. **Main Menu Tests Tab**:
    - Navigate to the Tests tab in the main menu.
-   - Select Import TRX...
+   - Select `Import TRX...`
    - Choose the TRX file you wish to import.
    - A new unit test session will be created, and the test results will be displayed.
 
