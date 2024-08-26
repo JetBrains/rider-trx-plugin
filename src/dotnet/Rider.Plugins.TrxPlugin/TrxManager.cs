@@ -87,47 +87,75 @@ public class TrxManager
         _myElementRepository.Clear();
     }
 
-    public List<UnitTestResult> ParseResults(XElement node)
+    private String ErrorCodeToStatus(int code)
+    {
+        if (code > 5 && code != 10) return "NotSupported";
+        return new List<string> { "Passed", "Failed", "Inconclusive", "Timeout", "Aborted", "NotExecuted" }[
+            code % 10];
+    }
+
+    public List<UnitTestResult> ParseResults(XElement node, XNamespace defaultNamespace)
     {
         var results = new List<UnitTestResult>();
         foreach (var result in node.Elements())
         {
             if (result.Name.LocalName == "UnitTestResult")
             {
-                var serializer = new XmlSerializer(typeof(UnitTestResult),
-                    "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
-                var startNode = new XElement(result);
-                using (var reader = startNode.CreateReader())
+                UnitTestResult unitTestResult = null;
+                if (defaultNamespace.ToString() == "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")
                 {
-                    var unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
+                    var serializer = new XmlSerializer(typeof(UnitTestResult),
+                        defaultNamespace.ToString());
+                    var startNode = new XElement(result);
+                    using var reader = startNode.CreateReader();
+                    unitTestResult = (UnitTestResult)serializer.Deserialize(reader);
                     if (unitTestResult == null)
                     {
                         continue;
                     }
-
-                    results.Add(unitTestResult);
                 }
+                else
+                {
+                    unitTestResult = new UnitTestResult()
+                    {
+                        TestId = result.Element("id")?.Element("testId")?.Element("id")?.Value,
+                        TestName = result.Element("testName")?.Value,
+                        Outcome = ErrorCodeToStatus(int.Parse(result.Element("outcome")?.Element("value__")?.Value??"0")),
+                        Duration = result.Element("duration")?.Value,
+                        Output = new Output()
+                        {
+                            ErrorInfo = new ErrorInfo()
+                            {
+                                Message = result.Element("errorInfo")?.Element("message")?.Value,
+                                StackTrace = result.Element("errorInfo")?.Element("stackTrace")?.Value
+                            }
+                        }
+                    };
+                }
+
+                results.Add(unitTestResult);
             }
             else
             {
-                results.AddRange(ParseResults(result));
+                results.AddRange(ParseResults(result, defaultNamespace));
             }
         }
 
         return results;
     }
 
-    private void AddDefinitions(XElement node, List<UnitTestResult> results)
+    private void AddDefinitions(XElement node, List<UnitTestResult> results, XNamespace defaultNamespace)
     {
         foreach (var element in node.Elements())
         {
-            if (element.Name.LocalName == "UnitTest")
+            if (defaultNamespace.ToString() == "http://microsoft.com/schemas/VisualStudio/TeamTest/2010")
             {
-                var serializer = new XmlSerializer(typeof(UnitTest),
-                    "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
-                var startNode = new XElement(element);
-                using (var reader = startNode.CreateReader())
+                if (element.Name.LocalName == "UnitTest")
                 {
+                    var serializer = new XmlSerializer(typeof(UnitTest),
+                        "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
+                    var startNode = new XElement(element);
+                    using var reader = startNode.CreateReader();
                     var unitTest = (UnitTest)serializer.Deserialize(reader);
                     foreach (var result in results)
                     {
@@ -137,10 +165,39 @@ public class TrxManager
                         }
                     }
                 }
+                else
+                {
+                    AddDefinitions(element, results, defaultNamespace);
+                }
             }
             else
             {
-                AddDefinitions(element, results);
+                if (element.Name.LocalName == "tests")
+                {
+                    foreach (var test in element.Elements("value"))
+                    {
+                        var testId = test.Element("id")?.Element("id")?.Value;
+                        var className = test.Element("testMethod")?.Element("className")?.Value;
+                        foreach (var result in results)
+                        {
+                            if (result.TestId == testId)
+                            {
+                                result.Definition = new UnitTest()
+                                {
+                                    TestMethod = new TestMethod()
+                                    {
+                                        ClassName = className
+                                    },
+                                    Id = testId
+                                };
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    AddDefinitions(element, results, defaultNamespace);
+                }
             }
         }
     }
@@ -170,7 +227,7 @@ public class TrxManager
             NaturalId = UT.CreateId(_myProjectCache.GetProject(_mySolution.SolutionDirectory.ToString()),
                 TargetFrameworkId.Default,
                 this._myTestProvider,
-                testRunId + ns.Name + current.TestName)
+                testRunId + ns + current.TestName)
         };
         if (elements.Contains(element))
         {
@@ -200,10 +257,8 @@ public class TrxManager
         XDocument document;
         try
         {
-            await using (var stream = File.OpenRead(trxFilePath))
-            {
-                document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
-            }
+            await using var stream = File.OpenRead(trxFilePath);
+            document = await XDocument.LoadAsync(stream, LoadOptions.None, CancellationToken.None);
         }
         catch (Exception ex)
         {
@@ -212,17 +267,19 @@ public class TrxManager
         }
 
         var root = document.Root;
+        var defaultNamespace = root?.GetDefaultNamespace();
+
         List<UnitTestResult> results;
         try
         {
-            results = ParseResults(root);
+            results = ParseResults(root, defaultNamespace);
         }
         catch (Exception ex)
         {
             _myLogger.Error(ex);
             return new RdCallResponse("Failed", "import.messages.error.parse");
         }
-
+        _myLogger.Error(results.Count.ToString());
         var countOuterResults = results.Count;
         try
         {
@@ -239,7 +296,7 @@ public class TrxManager
 
         try
         {
-            AddDefinitions(root, results);
+            AddDefinitions(root, results, defaultNamespace);
         }
         catch (Exception ex)
         {
@@ -249,7 +306,13 @@ public class TrxManager
 
         try
         {
-            await DisplayResults(_myLifetime, results, root?.Attribute("id")?.Value, trxFilePath);
+            var testRunId = root?.Attribute("id")?.Value;
+            if (defaultNamespace?.ToString() == "")
+            {
+                testRunId = root.Element("TestRun")?.Element("id")?.Value;
+            }
+
+            await DisplayResults(_myLifetime, results, testRunId, trxFilePath);
         }
         catch (Exception ex)
         {
