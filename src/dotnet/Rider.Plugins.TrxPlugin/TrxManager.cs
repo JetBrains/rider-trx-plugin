@@ -24,8 +24,8 @@ using JetBrains.ReSharper.UnitTestFramework.Elements;
 using JetBrains.ReSharper.UnitTestFramework.Persistence;
 using JetBrains.ReSharper.UnitTestFramework.UI.ViewModels;
 using JetBrains.Util;
-using JetBrains.Util.Dotnet.TargetFrameworkIds;
 using Rider.Plugins.TrxPlugin.TransientTestSessions;
+using TargetFrameworkId = JetBrains.Util.Dotnet.TargetFrameworkIds.TargetFrameworkId;
 using UnitTestResult = Rider.Plugins.TrxPlugin.TrxNodes.UnitTestResult;
 
 namespace Rider.Plugins.TrxPlugin;
@@ -42,6 +42,7 @@ public class TrxManager
     [NotNull] private readonly ILogger _myLogger;
     [NotNull] private readonly IUnitTestResultManager _myResultManager;
     [NotNull] private readonly ISolution _mySolution;
+    [NotNull] private readonly RealElementsFinder _myRealElementsFinder;
 
     public TrxManager(
         Lifetime lifetime,
@@ -57,9 +58,9 @@ public class TrxManager
         _myProjectCache = componentContainer.GetComponent<IUnitTestingProjectCache>();
         _myLogger = componentContainer.GetComponent<ILogger>();
         _mySolution = componentContainer.GetComponent<ISolution>();
+        _myRealElementsFinder = new RealElementsFinder(_mySolution);
         var myModel = _mySolution?.GetProtocolSolution().GetRdTrxPluginModel();
         myModel?.ImportTrxCall.SetAsync(HandleCall);
-
         _myLifetime.OnTermination(CloseAllUnitTestSessions);
         _mySessionConductor?.SessionClosed.Advise(_myLifetime, OnSessionClosed);
     }
@@ -69,7 +70,16 @@ public class TrxManager
         var session = sessionTreeViewModel.Session;
         if (session.Name.Value.Contains(".trx"))
         {
-            _ = _myElementRepository.Remove(session.Elements);
+            List<IUnitTestElement> toDelete = new List<IUnitTestElement>();
+            foreach (var element in session.Elements)
+            {
+                if (element.Kind == "Transient")
+                {
+                    toDelete.Add(element);
+                }
+            }
+
+            _ = _myElementRepository.Remove(toDelete);
         }
     }
 
@@ -84,35 +94,49 @@ public class TrxManager
         _myElementRepository.Clear();
     }
 
+
     private IUnitTestElement TestElementCreator(UnitTestResult current, IUnitTestTransaction tx,
         HashSet<IUnitTestElement> elements, string testRunId)
     {
         UnitTestElementNamespace ns = current.Definition?.TestMethod?.ClassName == null
             ? UnitTestElementNamespace.Create("")
-            : UnitTestElementNamespace.Create(current.Definition.TestMethod.ClassName);
+            : UnitTestElementNamespace.Create(
+                TrxParser.GetNamespaceFromClassName(current.Definition.TestMethod.ClassName));
         TestElement element = new TestElement(current.TestName, ns)
         {
             NaturalId = UT.CreateId(_myProjectCache.GetProject(_mySolution.SolutionDirectory.ToString()),
                 TargetFrameworkId.Default,
                 this._myTestProvider,
-                testRunId + ns + current.TestName)
+                testRunId + current.Definition?.TestMethod?.ClassName + current.TestName)
         };
         if (elements.Contains(element))
         {
             return null;
         }
 
-        if (current.InnerResults != null)
+        if (current.InnerResults is null)
         {
-            foreach (var child in current.InnerResults.UnitTestResults)
+            return element;
+        }
+
+        foreach (var child in current.InnerResults.UnitTestResults)
+        {
+            var childElement = TestElementCreator(child, tx, elements, testRunId);
+            if (childElement is null)
             {
-                var childElement = TestElementCreator(child, tx, elements, testRunId);
-                if (childElement != null)
-                {
-                    childElement.Parent = element;
-                    tx.Create(childElement);
-                    elements.Add(childElement);
-                }
+                continue;
+            }
+
+            childElement.Parent = element;
+            var realElement = _myRealElementsFinder.FindRealElement(child);
+            if (realElement is null)
+            {
+                tx.Create(childElement);
+                elements.Add(childElement);
+            }
+            else
+            {
+                elements.Add(realElement);
             }
         }
 
@@ -147,6 +171,7 @@ public class TrxManager
             _myLogger.Error(ex);
             return new RdCallResponse("Failed", "import.messages.error.parse");
         }
+
         var countOuterResults = results.Count;
         try
         {
@@ -208,10 +233,52 @@ public class TrxManager
                 foreach (var result in results)
                 {
                     var outerElement = TestElementCreator(result, tx, elements, id);
-                    if (outerElement != null)
+                    _myLogger.Error(outerElement?.ShortName + "");
+                    if (outerElement is null)
                     {
+                        continue;
+                    }
+                    var realElement = _myRealElementsFinder.FindRealElement(result);
+                    if (realElement is null)
+                    {
+                        var ns = result.Definition?.TestMethod?.ClassName == null
+                            ? UnitTestElementNamespace.Create("")
+                            : UnitTestElementNamespace.Create(
+                                TrxParser.GetNamespaceFromClassName(result.Definition.TestMethod.ClassName));
+                        if (result.Definition?.TestMethod?.ClassName is null)
+                        {
+                            tx.Create(outerElement);
+                            elements.Add(outerElement);
+                            continue;
+                        }
+                        var parent =
+                            new TestElement(TrxParser.GetOnlyClassName(result.Definition?.TestMethod?.ClassName),
+                                ns)
+                            {
+                                NaturalId = UT.CreateId(
+                                    _myProjectCache.GetProject(_mySolution.SolutionDirectory.ToString()),
+                                    TargetFrameworkId.Default,
+                                    this._myTestProvider,
+                                    id + result.Definition?.TestMethod?.ClassName +
+                                    TrxParser.GetOnlyClassName(result.Definition?.TestMethod?.ClassName))
+                            };
+                        if (elements.Contains(parent))
+                        {
+                            outerElement.Parent = elements.FirstOrDefault(e => e.Equals(parent));
+                        }
+                        else
+                        {
+                            tx.Create(parent);
+                            elements.Add(parent);
+                            outerElement.Parent = parent;
+                        }
+
                         tx.Create(outerElement);
                         elements.Add(outerElement);
+                    }
+                    else
+                    {
+                        elements.Add(realElement);
                     }
                 }
             }), ct);
@@ -221,7 +288,8 @@ public class TrxManager
         foreach (var element in elements)
         {
             var result = results.FirstOrDefault(r =>
-                (r.Definition?.TestMethod?.ClassName ?? "") == element.GetNamespace().ToString() &&
+                (TrxParser.GetNamespaceFromClassName(r.Definition?.TestMethod?.ClassName ?? "")) ==
+                element.GetNamespace().ToString() &&
                 r.TestName == element.ShortName);
 
             if (result == null)

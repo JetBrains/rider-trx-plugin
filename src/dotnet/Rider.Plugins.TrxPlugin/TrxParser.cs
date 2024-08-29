@@ -1,4 +1,8 @@
-﻿namespace Rider.Plugins.TrxPlugin;
+﻿using System.IO;
+using System.Linq;
+using JetBrains.Annotations;
+
+namespace Rider.Plugins.TrxPlugin;
 
 using System;
 using System.Collections.Generic;
@@ -9,11 +13,41 @@ using UnitTestResult = TrxNodes.UnitTestResult;
 
 public static class TrxParser
 {
-     private static String ErrorCodeToStatus(int code)
+    private static String ErrorCodeToStatus(int code)
     {
         if (code > 5 && code != 10) return "NotSupported";
         return new List<string> { "Passed", "Failed", "Inconclusive", "Timeout", "Aborted", "NotExecuted" }[
             code % 10];
+    }
+
+
+    public static String GetNamespaceFromClassName(string className)
+    {
+        var parts = className.Split('.');
+        string res = "";
+        for (int i = 0; i < parts.Length - 1; ++i)
+        {
+            res += parts[i];
+            if (i != parts.Length - 2)
+            {
+                res += '.';
+            }
+        }
+        return res;
+    }
+
+    public static String GetOnlyClassName(string className)
+    {
+        var parts = className.Split('.');
+        return parts.Last();
+    }
+
+
+    [CanBeNull]
+    public static string GetProjectName([NotNull] UnitTestResult result)
+    {
+        string codeBase = result.Definition?.TestMethod?.CodeBase;
+        return Path.GetFileNameWithoutExtension(codeBase);
     }
 
     public static List<UnitTestResult> ParseResults(XElement node, XNamespace defaultNamespace)
@@ -42,7 +76,8 @@ public static class TrxParser
                     {
                         TestId = result.Element("id")?.Element("testId")?.Element("id")?.Value,
                         TestName = result.Element("testName")?.Value,
-                        Outcome = ErrorCodeToStatus(int.Parse(result.Element("outcome")?.Element("value__")?.Value??"0")),
+                        Outcome = ErrorCodeToStatus(int.Parse(result.Element("outcome")?.Element("value__")?.Value ??
+                                                              "0")),
                         Duration = result.Element("duration")?.Value,
                         Output = new Output()
                         {
