@@ -262,6 +262,12 @@ public class TrxManager
                                     id + result.Definition?.TestMethod?.ClassName +
                                     TrxParser.GetOnlyClassName(result.Definition?.TestMethod?.ClassName))
                             };
+                        if (parent.Equals(outerElement))
+                        {
+                            tx.Create(outerElement);
+                            elements.Add(outerElement);
+                            continue;
+                        }
                         if (elements.Contains(parent))
                         {
                             outerElement.Parent = elements.FirstOrDefault(e => e.Equals(parent));
