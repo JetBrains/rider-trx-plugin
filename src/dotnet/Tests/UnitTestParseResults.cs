@@ -1,11 +1,9 @@
 using System.Xml.Linq;
-using JetBrains.Lifetimes;
 using Rider.Plugins.TrxPlugin;
-
 
 namespace Tests;
 
-public class TestParseResults
+public class UnitTestParseResults
 {
     private int _passed;
     private int _failed;
