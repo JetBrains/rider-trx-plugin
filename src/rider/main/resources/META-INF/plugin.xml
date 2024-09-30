@@ -24,12 +24,10 @@
                           relative-to-action="RiderUnitTestAppendTestsAction"/>
         </action>
     </actions>
-    <id>com.jetbrains.rider.plugins.trxplugin</id>
+    <id>com.jetbrains.rider.plugins.trx</id>
     <name>TRX Files Support</name>
     <version>1.0</version>
-    <vendor url="https://github.com/artem3605/TrxPlugin">
-        Artem Abaturov, Nikita Magomedeminov
-    </vendor>
+    <vendor>JetBrains</vendor>
     <depends>com.intellij.modules.rider</depends>
     <description><![CDATA[
     <p>This plugin provides support for TRX test result files in JetBrains Rider, allowing you to import TRX files as unit test sessions directly within the IDE.</p>
