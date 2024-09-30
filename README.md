@@ -6,7 +6,7 @@
 
 This plugin provides support for TRX test result files in JetBrains Rider. It allows to import TRX files as unit test sessions, making it easier to work with test results directly within the IDE.
 
-![image_2024-08-26_18-19-03](https://github.com/user-attachments/assets/bb7d4ec6-31e3-48ac-9024-fd2a29ad3c61)
+![Screenshot of an imported test session example](https://github.com/user-attachments/assets/bb7d4ec6-31e3-48ac-9024-fd2a29ad3c61)
 
 ## Features
 
@@ -26,6 +26,8 @@ You can install the TRX Support Plugin directly from the JetBrains Plugin Reposi
 3. Search for "TRX Support" and install the plugin.
 
 After installation, the plugin will be available for use without requiring any additional configuration.
+
+Alternatively, [visit the Plugin Marketplace][marketplace] and follow the instructions.
 
 ## Usage
 
@@ -64,3 +66,4 @@ We are very grateful to the initial developers of the plugin:
 
 [docs.changelog]: CHANGELOG.md
 [docs.license]: LICENSE.txt
+[marketplace]: https://plugins.jetbrains.com/plugin/25444-trx-files-support
