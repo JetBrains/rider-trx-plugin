@@ -1,5 +1,6 @@
+<!--suppress HtmlDeprecatedAttribute -->
 <p align="center">
-<img src="https://github.com/artem3605/TrxPlugin/blob/main/src/rider/main/resources/META-INF/pluginIcon.svg" alt="drawing" width="200"/>
+    <img src="src/rider/main/resources/META-INF/pluginIcon.svg" alt="drawing" width="200"/>
 </p>
 
 TRX Files Support Plugin for JetBrains Rider [![JetBrains incubator project][badge.jetbrains-incubator]][jetbrains-on-github] [![JetBrains Plugins Repository][badge.marketplace]][marketplace]
