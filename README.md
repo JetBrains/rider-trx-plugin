@@ -50,3 +50,17 @@ To use the TRX Support Plugin, there are 4 options:
 4. **Drag and Drop**:
    - Drag a TRX file from your file explorer and drop it directly into the editor.
    - This will create a new unit test session without opening the file.
+
+Documentation
+-------------
+- [Changelog][docs.changelog]
+- [License][docs.license] (Apache-2.0)
+
+Acknowledgements
+----------------
+We are very grateful to the initial developers of the plugin:
+- [Artem Abaturov](https://github.com/artem3605)
+- [Nikita Magomedeminov](https://github.com/Kreativshikkk)
+
+[docs.changelog]: CHANGELOG.md
+[docs.license]: LICENSE.txt
