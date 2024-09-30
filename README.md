@@ -2,7 +2,8 @@
 <img src="https://github.com/artem3605/TrxPlugin/blob/main/src/rider/main/resources/META-INF/pluginIcon.svg" alt="drawing" width="200"/>
 </p>
 
-# TRX Support Plugin for JetBrains Rider
+TRX Files Support Plugin for JetBrains Rider [![JetBrains incubator project](https://jb.gg/badges/incubator-plastic.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+======================================
 
 This plugin provides support for TRX test result files in JetBrains Rider. It allows to import TRX files as unit test sessions, making it easier to work with test results directly within the IDE.
 
@@ -19,11 +20,11 @@ This plugin provides support for TRX test result files in JetBrains Rider. It al
 
 ## Installation
 
-You can install the TRX Support Plugin directly from the JetBrains Plugin Repository or via the plugins section inside your JetBrains Rider IDE.
+You can install the **TRX Files Support** plugin directly from the JetBrains Plugin Repository or via the plugins section inside your JetBrains Rider IDE.
 
 1. Open your IDE.
 2. Navigate to `File | Settings | Plugins` (or `JetBrains Rider | Preferences | Plugins` on macOS).
-3. Search for "TRX Support" and install the plugin.
+3. Search for "TRX Files Support" and install the plugin.
 
 After installation, the plugin will be available for use without requiring any additional configuration.
 
