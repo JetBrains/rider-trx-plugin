@@ -45,6 +45,12 @@ jobs:
       - name: Build the plugin
         run: ./gradlew buildPlugin
 
+      - if: matrix.image == 'ubuntu-22.04'
+        id: version
+        name: Determine the version
+        shell: pwsh
+        run: '"version=$(./scripts/Get-Version.ps1)" >> $env:GITHUB_OUTPUT'
+
       - name: Unpack distribution # for uploading
         shell: pwsh
         run: scripts/Unpack-Distribution.ps1

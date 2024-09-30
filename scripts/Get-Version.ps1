@@ -15,7 +15,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $file = & "$PSScriptRoot/Get-Distribution.ps1" -DistributionsLocation $DistributionsLocation
-if (!($file.Name -match 'RiderTrxPlugin-(.*?)\.zip')) {
+if (!($file.Name -match 'rider-trx-plugin-(.*?)\.zip')) {
     throw "File name `"$($file.Name)`" doesn't match the expected pattern"
 }
 
