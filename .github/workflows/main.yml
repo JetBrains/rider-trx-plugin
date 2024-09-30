@@ -59,7 +59,7 @@ jobs:
         name: Upload the artifact
         uses: actions/upload-artifact@v4
         with:
-          name: rider-trx-plugin-${{ steps.version.outputs.version }}.zip
+          name: rider-trx-plugin-${{ steps.version.outputs.version }}
           path: build/distributions/unpacked
 
 
