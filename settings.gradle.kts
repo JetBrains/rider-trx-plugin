@@ -1,4 +1,4 @@
-rootProject.name = "RiderTrxPlugin"
+rootProject.name = "rider-trx-plugin"
 include(":protocol")
 
 pluginManagement {
