@@ -2,7 +2,7 @@
 <img src="https://github.com/artem3605/TrxPlugin/blob/main/src/rider/main/resources/META-INF/pluginIcon.svg" alt="drawing" width="200"/>
 </p>
 
-TRX Files Support Plugin for JetBrains Rider [![JetBrains incubator project](https://jb.gg/badges/incubator-plastic.svg)](https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub)
+TRX Files Support Plugin for JetBrains Rider [![JetBrains incubator project][badge.jetbrains-incubator]][jetbrains-on-github] [![JetBrains Plugins Repository][badge.marketplace]][marketplace]
 ======================================
 
 This plugin provides support for TRX test result files in JetBrains Rider. It allows to import TRX files as unit test sessions, making it easier to work with test results directly within the IDE.
@@ -65,6 +65,9 @@ We are very grateful to the initial developers of the plugin:
 - [Artem Abaturov](https://github.com/artem3605)
 - [Nikita Magomedeminov](https://github.com/Kreativshikkk)
 
+[badge.jetbrains-incubator]: https://jb.gg/badges/incubator-plastic.svg
+[badge.marketplace]: https://img.shields.io/jetbrains/plugin/v/25444.svg?label=rider%20&colorB=0A7BBB&style=flat-square
 [docs.changelog]: CHANGELOG.md
 [docs.license]: LICENSE.txt
+[jetbrains-on-github]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
 [marketplace]: https://plugins.jetbrains.com/plugin/25444-trx-files-support
