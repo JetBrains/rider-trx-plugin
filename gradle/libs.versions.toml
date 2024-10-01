@@ -1,11 +1,10 @@
 [versions]
-# https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library
 kotlin = "1.9.24"
 rdGen = "2024.1.1"
+riderSdk = "2024.2.5"
 
 [libraries]
 kotlinStdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
-openTest4J = "org.opentest4j:opentest4j:1.3.0"
 rdGen = { group = "com.jetbrains.rd", name = "rd-gen", version.ref = "rdGen" }
 
 [plugins]

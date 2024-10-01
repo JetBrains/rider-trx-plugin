@@ -1,13 +1,11 @@
 import com.jetbrains.plugin.structure.base.utils.isFile
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.jetbrains.changelog.date
 import org.jetbrains.changelog.exceptions.MissingVersionException
 import org.jetbrains.intellij.platform.gradle.Constants
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
-import org.jetbrains.changelog.date
 
 plugins {
     alias(libs.plugins.changelog)
@@ -33,7 +31,6 @@ repositories {
 }
 
 val pluginVersion: String by project
-val riderSdkVersion: String by project
 val untilBuildVersion: String by project
 val buildConfiguration: String by project
 val dotNetPluginId: String by project
@@ -67,16 +64,14 @@ dependencies {
 
                 else -> {
                     logger.lifecycle("*** Using Rider SDK from intellij-snapshots repository")
-                    rider(riderSdkVersion, useInstaller = false)
+                    rider(libs.versions.riderSdk, useInstaller = false)
                 }
             }
         }
 
         jetbrainsRuntime()
         instrumentationTools()
-        testFramework(TestFrameworkType.Bundled)
     }
-    testImplementation(libs.openTest4J)
 }
 
 intellijPlatform {
@@ -193,15 +188,6 @@ tasks {
 
     runIde {
         jvmArgs("-Xmx1500m")
-    }
-
-    test {
-        useTestNG()
-        testLogging {
-            showStandardStreams = true
-            exceptionFormat = TestExceptionFormat.FULL
-        }
-        environment["LOCAL_ENV_RUN"] = "true"
     }
 }
 

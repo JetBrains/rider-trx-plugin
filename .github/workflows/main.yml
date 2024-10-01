@@ -51,7 +51,7 @@ jobs:
 
       # Frontend
       - name: Build the plugin
-        run: ./gradlew build
+        run: ./gradlew build -PbuildConfiguration=Release
 
       - if: matrix.image == 'ubuntu-22.04'
         id: version
