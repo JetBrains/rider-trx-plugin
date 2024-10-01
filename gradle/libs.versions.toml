@@ -1,6 +1,6 @@
 [versions]
 kotlin = "1.9.24"
-rdGen = "2024.1.1"
+rdGen = "2024.3.0"
 riderSdk = "2024.2.5"
 
 [libraries]
