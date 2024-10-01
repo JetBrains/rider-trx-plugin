@@ -12,3 +12,5 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    ignore:
+      - dependency-name: "com.jetbrains.rd:rd-gen" # will be updated by intellij-updater
