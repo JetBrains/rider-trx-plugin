@@ -13,4 +13,5 @@ updates:
     schedule:
       interval: "daily"
     ignore:
-      - dependency-name: "com.jetbrains.rd:rd-gen" # will be updated by intellij-updater
+      - dependency-name: "com.jetbrains.rd:rd-gen" # managed by intellij-updater
+      - dependency-name: "org.jetbrains.kotlin.jvm" # managed by intellij-updater
