@@ -233,7 +233,6 @@ public class TrxManager
                 foreach (var result in results)
                 {
                     var outerElement = TestElementCreator(result, tx, elements, id);
-                    _myLogger.Error(outerElement?.ShortName + "");
                     if (outerElement is null)
                     {
                         continue;
