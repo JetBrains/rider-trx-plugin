@@ -43,7 +43,7 @@ jobs:
       - name: Test the backend
         run: dotnet test --configuration Release --no-build --logger trx src/dotnet/Tests
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ runner.os }}.test-results
