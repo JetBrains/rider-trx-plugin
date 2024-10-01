@@ -41,7 +41,13 @@ jobs:
       - name: Build the backend
         run: dotnet build --configuration Release
       - name: Test the backend
-        run: dotnet test --configuration Release --no-build src/dotnet/Tests
+        run: dotnet test --configuration Release --no-build --logger trx src/dotnet/Tests
+      - name: Upload test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: ${{ runner.os }}.test-results
+          path: "src/dotnet/Tests/TestResults/*.trx"
 
       # Frontend
       - name: Build the plugin
