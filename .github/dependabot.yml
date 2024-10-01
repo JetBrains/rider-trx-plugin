@@ -12,6 +12,7 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      - dependency-name: "com.jetbrains.rd:rd-gen" # managed by intellij-updater
-      - dependency-name: "org.jetbrains.kotlin.jvm" # managed by intellij-updater
+    ignore: # managed by intellij-updater
+      - dependency-name: "com.jetbrains.rd:rd-gen"
+      - dependency-name: "org.jetbrains.kotlin.jvm"
+      - dependency-name: "org.jetbrains.kotlin:kotlin-stdlib"
