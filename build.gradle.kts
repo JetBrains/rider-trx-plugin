@@ -134,7 +134,7 @@ tasks {
         dependsOn(rdGen, generateDotNetSdkProperties, generateNuGetConfig)
         doLast {
             exec {
-                executable("dotnet")
+                executable(layout.projectDirectory.file("dotnet.cmd"))
                 args("build", "-c", buildConfiguration)
             }
         }
