@@ -35,6 +35,14 @@ jobs:
           path: ${{ runner.os == 'Windows' && '~/AppData/Local/JetBrains/dotnet-cmd' || '~/.local/share/JetBrains/dotnet-cmd' }}
           key: ${{ runner.os }}-dotnet-${{ hashFiles('dotnet.cmd') }}
 
+      - name: 'Cache downloaded JDK'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.local/share/gradle-jvm
+            ~/AppData/Local/gradle-jvm
+          key: ${{ runner.os }}-${{ hashFiles('gradlew*') }}
+
       # Common preparation
       - name: Prepare build
         run: ./gradlew prepare
