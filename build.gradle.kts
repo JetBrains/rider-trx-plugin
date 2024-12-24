@@ -127,7 +127,7 @@ tasks {
         doLast {
             exec {
                 executable(layout.projectDirectory.file("dotnet.cmd"))
-                args("build", "-c", buildConfiguration)
+                args("build", "-consoleLoggerParameters:ErrorsOnly", "--configuration", buildConfiguration)
             }
         }
     }
