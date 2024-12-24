@@ -63,7 +63,6 @@ dependencies {
         }
 
         jetbrainsRuntime()
-        instrumentationTools()
     }
 }
 
