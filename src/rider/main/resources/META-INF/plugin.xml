@@ -11,7 +11,7 @@
         <fileDropHandler
             implementation="com.jetbrains.rider.plugins.trxplugin.handlers.TrxFileDropHandler"/>
     </extensions>
-    <actions resource-bundle="FrontendStrings">
+    <actions>
         <action id="TrxFileProjectViewAction"
                 class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction">
             <add-to-group group-id="SolutionExplorerPopupMenu" anchor="first"/>
@@ -42,5 +42,5 @@
     <br>
     ]]>
     </description>
-    <resource-bundle>FrontendStrings</resource-bundle>
+    <resource-bundle>messages.TrxPlugin</resource-bundle>
 </idea-plugin>
