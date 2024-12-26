@@ -11,15 +11,13 @@
         <fileDropHandler
             implementation="com.jetbrains.rider.plugins.trxplugin.handlers.TrxFileDropHandler"/>
     </extensions>
-    <actions>
-        <action
-            id="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction"
-            class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction"
-            description="Creating unit test session based on the file">
+    <actions resource-bundle="FrontendStrings">
+        <action id="TrxFileProjectViewAction"
+                class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileProjectViewAction">
             <add-to-group group-id="SolutionExplorerPopupMenu" anchor="first"/>
         </action>
-        <action id="com.jetbrains.rider.plugins.trxplugin.action.TrxFileOpenAction"
-                class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileOpenAction" text="Import TRX...">
+        <action id="TrxFileOpenAction"
+                class="com.jetbrains.rider.plugins.trxplugin.action.TrxFileOpenAction">
             <add-to-group group-id="Rider.UnitTesting.Main" anchor="before"
                           relative-to-action="RiderUnitTestAppendTestsAction"/>
         </action>
@@ -44,4 +42,5 @@
     <br>
     ]]>
     </description>
+    <resource-bundle>FrontendStrings</resource-bundle>
 </idea-plugin>

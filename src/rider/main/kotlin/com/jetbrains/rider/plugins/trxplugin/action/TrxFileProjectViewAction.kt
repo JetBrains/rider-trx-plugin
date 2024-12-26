@@ -18,7 +18,7 @@ object FrontendStrings : AbstractBundle("FrontendStrings") {
     }
 }
 
-class TrxFileProjectViewAction : AnAction(FrontendStrings.message("import.trx.session")), CoroutineScope {
+class TrxFileProjectViewAction : AnAction(), CoroutineScope {
 
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main
