@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+### Changed
+- Update the plugin name to clarify the supported technology.
+
 ## [1.0.2] - 2024-11-17
 ### Changed
 - **(Requirement update!)** Support Rider versions in range \[2024.3; 2025.1.*\].

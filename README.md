@@ -3,10 +3,11 @@
     <img src="src/rider/main/resources/META-INF/pluginIcon.svg" alt="drawing" width="200"/>
 </p>
 
-TRX Files Support Plugin for JetBrains Rider [![JetBrains incubator project][badge.jetbrains-incubator]][jetbrains-on-github] [![JetBrains Plugins Repository][badge.marketplace]][marketplace]
-======================================
+TRX Test Reports Plugin for JetBrains Rider [![JetBrains incubator project][badge.jetbrains-incubator]][jetbrains-on-github] [![JetBrains Plugins Repository][badge.marketplace]][marketplace]
+===========================================
 
-This plugin provides support for TRX test result files in JetBrains Rider. It allows to import TRX files as unit test sessions, making it easier to work with test results directly within the IDE.
+This plugin provides support for TRX test report files in JetBrains Rider.
+It allows importing TRX files as unit test sessions, making it easier to work with test reports directly within the IDE.
 
 ![Screenshot of an imported test session example](https://github.com/user-attachments/assets/bb7d4ec6-31e3-48ac-9024-fd2a29ad3c61)
 
@@ -21,11 +22,11 @@ This plugin provides support for TRX test result files in JetBrains Rider. It al
 
 ## Installation
 
-You can install the **TRX Files Support** plugin directly from the JetBrains Plugin Repository or via the plugins section inside your JetBrains Rider IDE.
+You can install the **TRX Test Reports** plugin directly from the JetBrains Plugin Repository or via the plugins section inside your JetBrains Rider IDE.
 
 1. Open your IDE.
 2. Navigate to `File | Settings | Plugins` (or `JetBrains Rider | Preferences | Plugins` on macOS).
-3. Search for "TRX Files Support" and install the plugin.
+3. Search for "TRX Test Reports" and install the plugin.
 
 After installation, the plugin will be available for use without requiring any additional configuration.
 
@@ -33,7 +34,7 @@ Alternatively, [visit the Plugin Marketplace][marketplace] and follow the instru
 
 ## Usage
 
-To use the TRX Support Plugin, there are 4 options:
+To use the TRX Test Reports Plugin, there are 4 options:
 
 1. **Context Menu**:
    - Right-click on a TRX file in the file editor or project view.
@@ -71,4 +72,4 @@ We are very grateful to the initial developers of the plugin:
 [docs.changelog]: CHANGELOG.md
 [docs.license]: LICENSE.txt
 [jetbrains-on-github]: https://confluence.jetbrains.com/display/ALL/JetBrains+on+GitHub
-[marketplace]: https://plugins.jetbrains.com/plugin/25444-trx-files-support
+[marketplace]: https://plugins.jetbrains.com/plugin/25444

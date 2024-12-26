@@ -25,12 +25,12 @@
         </action>
     </actions>
     <id>com.jetbrains.rider.plugins.trx</id>
-    <name>TRX Files Support</name>
+    <name>TRX Test Reports</name>
     <version>1.0</version>
     <vendor>JetBrains</vendor>
     <depends>com.intellij.modules.rider</depends>
     <description><![CDATA[
-    <p>This plugin provides support for TRX test result files in JetBrains Rider, allowing you to import TRX files as unit test sessions directly within the IDE.</p>
+    <p>This plugin provides support for TRX test report files in JetBrains Rider. It allows importing TRX files as unit test sessions, making it easier to work with test reports directly within the IDE.</p>
 
     <p><b>Key Features:</b></p>
     <ul>
