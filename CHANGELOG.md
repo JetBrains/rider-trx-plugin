@@ -6,6 +6,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 ### Changed
+- **(Requirement update!)** Support Rider versions in range \[2025.1 EAP 3; 2025.1.*\].
 - Update the plugin name to clarify the supported technology.
 
 ## [1.0.2] - 2024-11-17

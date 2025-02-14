@@ -188,7 +188,7 @@ tasks {
     withType<Test> {
         classpath -= classpath.filter {
             (it.name.startsWith("localization-") && it.name.endsWith(".jar")) // TODO: https://youtrack.jetbrains.com/issue/IJPL-178084/External-plugin-tests-break-due-to-localization-issues
-                || it.name == "platform-ijent-impl.jar" // TODO: Check after 251 migration
+                || it.name == "cwm-plugin.jar" // TODO: Check after 251 EAP5 release
         }
 
         useTestNG()
@@ -198,6 +198,16 @@ tasks {
         }
         environment["LOCAL_ENV_RUN"] = "true"
     }
+
+    val testRiderPreview by intellijPlatformTesting.testIde.registering {
+        version = libs.versions.riderSdkPreview
+        useInstaller = false
+        task {
+            enabled = libs.versions.riderSdk.get() != libs.versions.riderSdkPreview.get()
+        }
+    }
+
+    check { dependsOn(testRiderPreview.name) }
 
     runIde {
         jvmArgs("-Xmx1500m")
