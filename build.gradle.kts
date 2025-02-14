@@ -1,10 +1,12 @@
 import com.jetbrains.plugin.structure.base.utils.isFile
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.exceptions.MissingVersionException
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
+import kotlin.io.path.pathString
 
 plugins {
     alias(libs.plugins.changelog)
@@ -63,6 +65,11 @@ dependencies {
         }
 
         jetbrainsRuntime()
+
+        // TODO: Fix after migration to intellij-platform-gradle-plugin 2.2.2
+        bundledLibrary(provider {
+            project.intellijPlatform.platformPath.resolve("lib/testFramework.jar").pathString
+        })
     }
 }
 
@@ -176,6 +183,20 @@ tasks {
                 if (!file.exists()) throw RuntimeException("File \"$file\" does not exist.")
             }
         }
+    }
+
+    withType<Test> {
+        classpath -= classpath.filter {
+            (it.name.startsWith("localization-") && it.name.endsWith(".jar"))
+                || it.name == "platform-ijent-impl.jar"
+        }
+
+        useTestNG()
+        testLogging {
+            showStandardStreams = true
+            exceptionFormat = TestExceptionFormat.FULL
+        }
+        environment["LOCAL_ENV_RUN"] = "true"
     }
 
     runIde {
