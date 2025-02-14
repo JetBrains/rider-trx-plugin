@@ -2,10 +2,13 @@ package com.jetbrains.rider.plugins.trxplugin.test.cases
 
 import com.jetbrains.rider.plugins.trxplugin.TrxImportService
 import com.jetbrains.rider.protocol.protocol
+import com.jetbrains.rider.test.OpenSolutionParams
 import com.jetbrains.rider.test.asserts.shouldBe
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
 import com.jetbrains.rider.test.base.BaseTestWithSolution
+import com.jetbrains.rider.test.facades.solution.RiderSolutionApiFacade
+import com.jetbrains.rider.test.facades.solution.SolutionApiFacade
 import com.jetbrains.rider.test.scriptingApi.runBlockingWithProtocolPumping
 import com.jetbrains.rider.test.scriptingApi.withUtFacade
 import org.testng.annotations.Test
@@ -16,6 +19,15 @@ import kotlin.io.path.isRegularFile
 
 class BasicTrxImportTest : BaseTestWithSolution() {
     override val testSolution = "EmptySolution"
+
+    override val solutionApiFacade: SolutionApiFacade = object : RiderSolutionApiFacade() {
+        override fun waitForSolution(params: OpenSolutionParams) {
+            // This may sometimes take a long time (especially on GitHub Actions).
+            params.projectModelReadyTimeout = params.projectModelReadyTimeout.multipliedBy(10L)
+
+            return super.waitForSolution(params)
+        }
+    }
 
     @Test
     fun test1TrxImport() {
