@@ -187,8 +187,8 @@ tasks {
 
     withType<Test> {
         classpath -= classpath.filter {
-            (it.name.startsWith("localization-") && it.name.endsWith(".jar"))
-                || it.name == "platform-ijent-impl.jar"
+            (it.name.startsWith("localization-") && it.name.endsWith(".jar")) // TODO: https://youtrack.jetbrains.com/issue/IJPL-178084/External-plugin-tests-break-due-to-localization-issues
+                || it.name == "platform-ijent-impl.jar" // TODO: Check after 251 migration
         }
 
         useTestNG()
