@@ -1,8 +1,8 @@
 [versions]
 kotlin = "2.1.10"
 rdGen = "2025.1.1"
-riderSdk = "2025.1-EAP3-SNAPSHOT"
-riderSdkPreview = "2025.1-EAP3-SNAPSHOT"
+riderSdk = "2025.1-EAP7-SNAPSHOT"
+riderSdkPreview = "2025.1-EAP7-SNAPSHOT"
 
 [libraries]
 kotlinStdLib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
