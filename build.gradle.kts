@@ -2,6 +2,7 @@ import com.jetbrains.plugin.structure.base.utils.isFile
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.exceptions.MissingVersionException
 import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.io.path.absolute
@@ -66,10 +67,7 @@ dependencies {
 
         jetbrainsRuntime()
 
-        // TODO: Fix after migration to intellij-platform-gradle-plugin 2.2.2
-        bundledLibrary(provider {
-            project.intellijPlatform.platformPath.resolve("lib/testFramework.jar").pathString
-        })
+        testFramework(TestFrameworkType.Bundled)
     }
 }
 
