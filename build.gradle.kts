@@ -7,7 +7,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
-import kotlin.io.path.pathString
 
 plugins {
     alias(libs.plugins.changelog)
