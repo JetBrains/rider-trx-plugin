@@ -13,7 +13,7 @@
         "file": "gradle.properties",
         "field": "untilBuildVersion",
         "kind": "rider",
-        "versionFlavor": "release",
+        "versionFlavor": "eap",
         "augmentation": "nextMajor"
     }, {
         "file": "gradle/libs.versions.toml",
