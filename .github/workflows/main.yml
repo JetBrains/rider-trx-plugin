@@ -30,13 +30,13 @@ jobs:
           large-packages: false
 
       - name: dotnet.cmd cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ runner.os == 'Windows' && '~/AppData/Local/JetBrains/dotnet-cmd' || '~/.local/share/JetBrains/dotnet-cmd' }}
           key: ${{ runner.os }}-dotnet-${{ hashFiles('dotnet.cmd') }}
 
       - name: 'Cache downloaded JDK'
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.local/share/gradle-jvm
