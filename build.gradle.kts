@@ -199,6 +199,16 @@ tasks {
         }
     }
 
+    prepareTestSandbox {
+        dependsOn(compileDotNet)
+
+        dotNetOutputFiles.forEach { fileName ->
+            from("${dotNetOutputDir}/${fileName}") {
+                into("${rootProject.name}/dotnet")
+            }
+        }
+    }
+
     withType<Test> {
         classpath -= classpath.filter {
             (it.name.startsWith("localization-") && it.name.endsWith(".jar")) // TODO: https://youtrack.jetbrains.com/issue/IJPL-178084/External-plugin-tests-break-due-to-localization-issues
