@@ -241,40 +241,25 @@ tasks {
 // ========= Two-Phase Build for Signing Support ================
 
 // Preparation for signing. Build all dll's and jar's and puts them into ${pluginStagingDir}
-val preparePluginForSigning by tasks.registering {
+val preparePluginForSigning by tasks.registering(Sync::class) {
     description = "Prepares plugin files for signing and generates signing manifest"
     group = "build"
 
-    // Mirror BuildPluginTask dependencies:
-    // - prepareSandbox provides the main plugin directory
-    // - jarSearchableOptions provides the searchable options JAR
-    dependsOn(tasks.prepareSandbox)
-    dependsOn(tasks.jarSearchableOptions)
+    // Source 1: Copy the full plugin directory from prepareSandbox
+    from(tasks.prepareSandbox.map { it.pluginDirectory })
 
-    // Clean staging directory FIRST to prevent poisoning
-    doFirst {
-        delete(pluginStagingDir)
-        mkdir(pluginStagingDir)
+    // Source 2: Copy searchable options JAR to lib/ (when enabled)
+    if (intellijPlatform.buildSearchableOptions.get()) {
+        from(tasks.jarSearchableOptions.map { it.archiveFile }) {
+            into("lib")
+        }
     }
 
+    // Destination: the plugin content directory inside staging
+    into(pluginContentDir)
+
+    // After syncing, generate the signing manifest
     doLast {
-        // Step 1: Copy from prepareSandbox.pluginDirectory (same as BuildPluginTask)
-        val sandboxPluginDir = tasks.prepareSandbox.get().pluginDirectory.get().asFile
-        copy {
-            from(sandboxPluginDir)
-            into(pluginContentDir)
-        }
-
-        // Step 2: Copy searchable options JAR to lib/ (same as BuildPluginTask)
-        // Only when buildSearchableOptions is enabled; when disabled, the JAR won't exist
-        if (intellijPlatform.buildSearchableOptions.get()) {
-            copy {
-                from(tasks.jarSearchableOptions.get().archiveFile)
-                into(file("${pluginContentDir}/lib"))
-            }
-        }
-
-        // Step 3: Generate signing manifest
         val filesToSign = mutableListOf<String>()
 
         // Add JAR files that need signing (only our own code)
