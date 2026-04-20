@@ -3,10 +3,14 @@ package com.jetbrains.rider.plugins.trxplugin.test.cases
 import com.jetbrains.rider.plugins.trxplugin.TrxImportService
 import com.jetbrains.rider.protocol.protocol
 import com.jetbrains.rider.test.OpenSolutionParams
+import com.jetbrains.rider.test.annotations.Solution
+import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.asserts.shouldBe
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
-import com.jetbrains.rider.test.base.BaseTestWithSolution
+import com.jetbrains.rider.test.base.PerClassSolutionTestBase
+import com.jetbrains.rider.test.enums.BuildTool
+import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.facades.solution.RiderSolutionApiFacade
 import com.jetbrains.rider.test.facades.solution.SolutionApiFacade
 import com.jetbrains.rider.test.scriptingApi.runBlockingWithProtocolPumping
@@ -17,8 +21,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.isRegularFile
 
-class BasicTrxImportTest : BaseTestWithSolution() {
-    override val testSolution = "EmptySolution"
+@TestSettings(sdkVersion = SdkVersion.AUTODETECT, buildTool = BuildTool.AUTODETECT)
+@Solution("EmptySolution")
+class BasicTrxImportTest : PerClassSolutionTestBase() {
 
     override val solutionApiFacade: SolutionApiFacade = object : RiderSolutionApiFacade() {
         override fun waitForSolution(params: OpenSolutionParams) {

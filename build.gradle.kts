@@ -4,8 +4,8 @@ import org.jetbrains.changelog.exceptions.MissingVersionException
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import kotlin.io.path.absolute
 import java.util.zip.ZipFile
+import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
 
 plugins {
@@ -51,6 +51,10 @@ dependencies {
 
         testFramework(TestFrameworkType.Bundled)
     }
+
+    testImplementation(libs.junit)
+    testImplementation(libs.kotlin.test)
+    testImplementation(libs.testng)
 }
 
 intellijPlatform {
@@ -104,7 +108,7 @@ val riderSdkPath by lazy {
 
 kotlin {
     jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(17)
+        languageVersion = JavaLanguageVersion.of(21)
     }
 }
 
@@ -152,14 +156,10 @@ tasks {
         dependsOn(rdGen, generateDotNetSdkProperties, generateNuGetConfig)
     }
 
-    val compileDotNet by registering {
+    val compileDotNet by registering(Exec::class) {
         dependsOn(rdGen, generateDotNetSdkProperties, generateNuGetConfig)
-        doLast {
-            exec {
-                executable(layout.projectDirectory.file("dotnet.cmd"))
-                args("build", "-consoleLoggerParameters:ErrorsOnly", "--configuration", buildConfiguration)
-            }
-        }
+        executable(layout.projectDirectory.file("dotnet.cmd"))
+        args("build", "-consoleLoggerParameters:ErrorsOnly", "--configuration", buildConfiguration)
     }
 
     withType<KotlinCompile> {
