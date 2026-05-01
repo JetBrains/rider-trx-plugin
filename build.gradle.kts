@@ -17,10 +17,17 @@ plugins {
 }
 
 allprojects {
-
     repositories {
         maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
         mavenCentral()
+    }
+
+    plugins.withType<JavaBasePlugin> {
+        extensions.configure<JavaPluginExtension> {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
+        }
     }
 }
 
@@ -105,12 +112,6 @@ val riderSdkPath by lazy {
     return@lazy path
 }
 
-
-kotlin {
-    jvmToolchain {
-        languageVersion = JavaLanguageVersion.of(21)
-    }
-}
 
 sourceSets {
     main {
