@@ -3,6 +3,7 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.exceptions.MissingVersionException
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.zip.ZipFile
 import kotlin.io.path.absolute
@@ -66,15 +67,27 @@ dependencies {
     testImplementation(libs.testng)
 }
 
-intellijPlatform {
-    this.instrumentCode = false
-    this.buildSearchableOptions = false
-}
-
 val pluginVersion: String by project
-val untilBuildVersion: String by project
+val untilBuildForVerification: String by project
 val buildConfiguration: String by project
 val dotNetPluginId: String by project
+
+intellijPlatform {
+    instrumentCode = false
+    buildSearchableOptions = false
+
+    pluginVerification {
+        ides {
+            select {
+                channels = listOf(
+                    ProductRelease.Channel.RELEASE,
+                    ProductRelease.Channel.EAP
+                )
+                untilBuild = untilBuildForVerification
+            }
+        }
+    }
+}
 
 version = pluginVersion
 
@@ -170,7 +183,6 @@ tasks {
     }
 
     patchPluginXml {
-        untilBuild.set(untilBuildVersion)
         val latestChangelog = try {
             changelog.getUnreleased()
         } catch (_: MissingVersionException) {
@@ -229,15 +241,9 @@ tasks {
         environment["LOCAL_ENV_RUN"] = "true"
     }
 
-    val testRiderPreview by intellijPlatformTesting.testIde.registering {
-        version = libs.versions.riderSdkPreview
-        useInstaller = false
-        task {
-            enabled = libs.versions.riderSdk.get() != libs.versions.riderSdkPreview.get()
-        }
+    check {
+        dependsOn(verifyPlugin)
     }
-
-    check { dependsOn(testRiderPreview.name) }
 
     runIde {
         jvmArgs("-Xmx1500m")
