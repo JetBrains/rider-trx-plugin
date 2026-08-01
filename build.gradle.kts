@@ -57,6 +57,8 @@ dependencies {
             }
         }
 
+        bundledModule("intellij.rider.rdclient.dotnet")
+
         jetbrainsRuntime()
 
         testFramework(TestFrameworkType.Bundled)
