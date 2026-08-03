@@ -25,7 +25,7 @@ jobs:
           fetch-depth: 0
 
       - id: update
-        uses: ForNeVeR/intellij-updater@v1
+        uses: ForNeVeR/intellij-updater@v1.14.1
         name: "Update the IDE versions"
 
       - if: steps.update.outputs.has-changes == 'true' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
