@@ -26,6 +26,33 @@
 @rem Set local scope for the variables, and ensure extensions are enabled
 setlocal EnableExtensions
 
+@rem Catch executions from older scripts and ensure they exit cleanly.
+@rem This can be removed once we can be reasonably confident that few people
+@rem will be migrating directly to this new wrapper.
+goto afterSafetyNet
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+goto exitWithErrorLevel
+:afterSafetyNet
+
 set DIRNAME=%~dp0
 if "%DIRNAME%"=="" set DIRNAME=.
 @rem This is normally unused
@@ -38,91 +65,6 @@ for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
 @rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
 set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 
-@rem GRADLE JVM WRAPPER START MARKER
-
-setlocal
-set BUILD_DIR=%LOCALAPPDATA%\gradle-jvm
-
-for /f "tokens=3 delims= " %%A in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v "PROCESSOR_ARCHITECTURE"') do set WIN_ARCH=%%A
-if "%WIN_ARCH%" equ "AMD64" (
-    set JVM_TARGET_DIR=%BUILD_DIR%\jdk-25.0.2_windows-x64_bin-96701c\
-    set JVM_URL=https://download.oracle.com/java/25/archive/jdk-25.0.2_windows-x64_bin.zip
-) else if "%WIN_ARCH%" equ "ARM64" (
-    set JVM_TARGET_DIR=%BUILD_DIR%\microsoft-jdk-25.0.2-windows-aarch64-7d2a81\
-    set JVM_URL=https://aka.ms/download-jdk/microsoft-jdk-25.0.2-windows-aarch64.zip
-) else (
-    echo Unknown architecture %WIN_ARCH%
-    goto fail
-)
-
-set IS_TAR_GZ=0
-set JVM_TEMP_FILE=gradle-jvm.zip
-
-if /I "%JVM_URL:~-7%"==".tar.gz" (
-    set IS_TAR_GZ=1
-    set JVM_TEMP_FILE=gradle-jvm.tar.gz
-)
-
-set POWERSHELL=%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe
-
-if not exist "%JVM_TARGET_DIR%" MD "%JVM_TARGET_DIR%"
-
-if not exist "%JVM_TARGET_DIR%.flag" goto downloadAndExtractJvm
-
-set /p CURRENT_FLAG=<"%JVM_TARGET_DIR%.flag"
-if "%CURRENT_FLAG%" == "%JVM_URL%" goto continueWithJvm
-
-:downloadAndExtractJvm
-
-PUSHD "%BUILD_DIR%"
-if errorlevel 1 goto fail
-
-echo Downloading %JVM_URL% to %BUILD_DIR%\%JVM_TEMP_FILE%
-if exist "%JVM_TEMP_FILE%" DEL /F "%JVM_TEMP_FILE%"
-"%POWERSHELL%" -nologo -noprofile -Command "Set-StrictMode -Version 3.0; $ErrorActionPreference = \"Stop\"; (New-Object Net.WebClient).DownloadFile('%JVM_URL%', '%JVM_TEMP_FILE%')"
-if errorlevel 1 goto fail
-
-POPD
-
-RMDIR /S /Q "%JVM_TARGET_DIR%"
-if errorlevel 1 goto fail
-
-MKDIR "%JVM_TARGET_DIR%"
-if errorlevel 1 goto fail
-
-PUSHD "%JVM_TARGET_DIR%"
-if errorlevel 1 goto fail
-
-echo Extracting %BUILD_DIR%\%JVM_TEMP_FILE% to %JVM_TARGET_DIR%
-
-if "%IS_TAR_GZ%"=="1" (
-    tar xf "..\\%JVM_TEMP_FILE%"
-) else (
-    "%POWERSHELL%" -nologo -noprofile -command "Set-StrictMode -Version 3.0; $ErrorActionPreference = \"Stop\"; Add-Type -A 'System.IO.Compression.FileSystem'; [IO.Compression.ZipFile]::ExtractToDirectory('..\\%JVM_TEMP_FILE%', '.');"
-)
-if errorlevel 1 goto fail
-
-DEL /F "..\%JVM_TEMP_FILE%"
-if errorlevel 1 goto fail
-
-POPD
-
-echo %JVM_URL%>"%JVM_TARGET_DIR%.flag"
-if errorlevel 1 goto fail
-
-:continueWithJvm
-
-set JAVA_HOME=
-for /d %%d in ("%JVM_TARGET_DIR%"*) do if exist "%%d\bin\java.exe" set JAVA_HOME=%%d
-if not exist "%JAVA_HOME%\bin\java.exe" (
-  echo Unable to find java.exe under %JVM_TARGET_DIR%
-  goto fail
-)
-
-endlocal & set JAVA_HOME=%JAVA_HOME%
-
-@rem GRADLE JVM WRAPPER END MARKER
-
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 
@@ -130,13 +72,14 @@ set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
 if %ERRORLEVEL% equ 0 goto execute
 
-echo. 1>&2
-echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH. 1>&2
-echo. 1>&2
-echo Please set the JAVA_HOME variable in your environment to match the 1>&2
-echo location of your Java installation. 1>&2
+1>&2 echo.
+1>&2 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+1>&2 echo.
+1>&2 echo Please set the JAVA_HOME variable in your environment to match the
+1>&2 echo location of your Java installation.
 
 "%COMSPEC%" /c exit 1
+goto exitWithErrorLevel
 
 :findJavaFromJavaHome
 set JAVA_HOME=%JAVA_HOME:"=%
@@ -144,13 +87,14 @@ set JAVA_EXE=%JAVA_HOME%/bin/java.exe
 
 if exist "%JAVA_EXE%" goto execute
 
-echo. 1>&2
-echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME% 1>&2
-echo. 1>&2
-echo Please set the JAVA_HOME variable in your environment to match the 1>&2
-echo location of your Java installation. 1>&2
+1>&2 echo.
+1>&2 echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
+1>&2 echo.
+1>&2 echo Please set the JAVA_HOME variable in your environment to match the
+1>&2 echo location of your Java installation.
 
 "%COMSPEC%" /c exit 1
+goto exitWithErrorLevel
 
 :execute
 @rem Setup the command line
@@ -160,8 +104,9 @@ echo location of your Java installation. 1>&2
 @rem Execute gradlew
 @rem endlocal doesn't take effect until after the line is parsed and variables are expanded
 @rem which allows us to clear the local environment before executing the java command
-endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel
+endlocal & "%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -jar "%APP_HOME%\gradle\wrapper\gradle-wrapper.jar" %* & call :exitWithErrorLevel & goto exitWithErrorLevel
 
+@rem This label must not be changed. We rely on old scripts being able to jump to this point.
 :exitWithErrorLevel
 @rem Use "%COMSPEC%" /c exit to allow operators to work properly in scripts
 "%COMSPEC%" /c exit %ERRORLEVEL%
