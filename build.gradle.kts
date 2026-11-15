@@ -3,7 +3,6 @@ import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.jetbrains.changelog.exceptions.MissingVersionException
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.zip.ZipFile
 import kotlin.io.path.absolute
@@ -73,7 +72,6 @@ dependencies {
 }
 
 val pluginVersion: String by project
-val untilBuildForVerification: String by project
 val buildConfiguration: String by project
 val dotNetPluginId: String by project
 
@@ -83,13 +81,7 @@ intellijPlatform {
 
     pluginVerification {
         ides {
-            select {
-                channels = listOf(
-                    ProductRelease.Channel.RELEASE,
-                    ProductRelease.Channel.EAP
-                )
-                untilBuild = untilBuildForVerification
-            }
+            current()
         }
     }
 }
