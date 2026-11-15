@@ -58,6 +58,7 @@ dependencies {
         }
 
         bundledModule("intellij.rider.rdclient.dotnet")
+        bundledPlugin("com.intellij.xml")
 
         jetbrainsRuntime()
 
