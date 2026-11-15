@@ -66,8 +66,10 @@ dependencies {
     }
 
     testImplementation(libs.junit)
+    testImplementation(libs.junit.jupiter)
+    testRuntimeOnly(libs.junit.engine)
+    testRuntimeOnly(libs.junit.launcher)
     testImplementation(libs.kotlin.test)
-    testImplementation(libs.testng)
 }
 
 val pluginVersion: String by project
@@ -236,7 +238,9 @@ tasks {
                 || it.name == "cwm-plugin.jar" // TODO: Check after 251 EAP5 release
         }
 
-        useTestNG()
+        useJUnitPlatform()
+        // Ignore IJ Platform JUnit5 framework set up and tear down
+        systemProperty("intellij.build.test.ignoreFirstAndLastTests", "true")
         testLogging {
             showStandardStreams = true
             exceptionFormat = TestExceptionFormat.FULL

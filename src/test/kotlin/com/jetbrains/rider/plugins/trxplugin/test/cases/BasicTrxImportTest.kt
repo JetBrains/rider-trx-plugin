@@ -8,14 +8,15 @@ import com.jetbrains.rider.test.annotations.TestSettings
 import com.jetbrains.rider.test.asserts.shouldBe
 import com.jetbrains.rider.test.asserts.shouldBeTrue
 import com.jetbrains.rider.test.asserts.shouldNotBeNull
-import com.jetbrains.rider.test.base.PerClassSolutionTestBase
 import com.jetbrains.rider.test.enums.BuildTool
 import com.jetbrains.rider.test.enums.sdk.SdkVersion
 import com.jetbrains.rider.test.facades.solution.RiderSolutionApiFacade
 import com.jetbrains.rider.test.facades.solution.SolutionApiFacade
+import com.jetbrains.rider.test.junit5.base.PerClassSolutionTestBase
 import com.jetbrains.rider.test.scriptingApi.runBlockingWithProtocolPumping
 import com.jetbrains.rider.test.scriptingApi.withUtFacade
-import org.testng.annotations.Test
+import org.junit.jupiter.api.Tag
+import org.junit.jupiter.api.Test
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
@@ -23,6 +24,7 @@ import kotlin.io.path.isRegularFile
 
 @TestSettings(sdkVersion = SdkVersion.AUTODETECT, buildTool = BuildTool.AUTODETECT)
 @Solution("EmptySolution")
+@Tag("episode/Plugins/TrxPlugin")
 class BasicTrxImportTest : PerClassSolutionTestBase() {
 
     override val solutionApiFacade: SolutionApiFacade = object : RiderSolutionApiFacade() {
